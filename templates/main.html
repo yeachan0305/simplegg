@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>simplegg main</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main_styles.css') }}">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="#">통계</a></li>
+                <li><a href="#">랭킹</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <div class="logo">
+            <img src="{{ url_for('static', filename='images/logo.png') }}" alt="simplegg Logo">
+        </div>
+        <div class="search-container">
+            <form action="/profile/" method="post" style="display: flex; justify-content: center;">
+                <div style="display: flex; align-items: center;">
+                    <input type="text" id="search-box" name="inputs" placeholder="플레이어 이름 + #태그">
+                    <button type="submit" id="search-button">Search</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+</html>

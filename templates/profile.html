@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='profile_styles.css') }}">
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-info">
+            <img src="{{ profileData.icon }}" alt="profile icon">
+            <p class="info">Name: <span>{{ profileData.name }}</span></p>
+            <p class="info">Level: <span>{{ profileData.level }}</span></p>
+            <p class="info">Tier: <span>{{ profileData.tier }}</span></p>
+            <p class="info">Win Rate last 20 games: <span>{{ profileData.winRate }} ({{ profileData.win }} wins - {{ profileData.lose }} loses)</span></p>
+            <p class="info">In Game: <span>{{ profileData.inGame }}</span></p>
+        </div>
+
+        <div class="match-history">
+            <h2>최근 게임</h2>
+            <!-- Add match history here -->
+            <!-- Example: -->
+            <div class="match">
+                <p class="match-info">Date: <span>2024-05-27</span></p>
+                <p class="match-info">data: <span>data</span></p>
+                <p class="match-info">Result: <span>Win</span></p>
+                <!-- Add more match info as needed -->
+            </div>
+        </div>
+    </div>
+</body>
+</html>
