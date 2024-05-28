@@ -35,38 +35,14 @@ def profile_functions():
 def matches_functions():
     inputs = request.form['inputs'].split('#')
 
-    matchId = None
+    matchHistory = [
+    ]
 
-    matchData, gameMode = get_matches_data(matchId, inputs[0])
-    styles = [style['style'] for style in matchData['styles']]
+    matchIds = get_summoner_matchId(api_get_puuid(inputs[0], inputs[1]))
+    for i in range(len(matchIds)):
+        matches = matchdata_parsing(matchIds[i], inputs[0])
+        matchHistory.append(matches)
 
-    matchHistory = {
-        "gameMode": gameMode,
-        "win": matchData["win"],
-        "championId": matchData["championId"],
-        "championName": matchData["championName"],
-        "gameLength": matchData["gameLength"],
-        'kills': matchData['kills'],
-        "deaths": matchData["deaths"],
-        'assists': matchData['assists'],
-        "kda": matchData["kda"],
-        "item0": matchData["item0"],
-        "item1": matchData["item1"],
-        "item2": matchData["item2"],
-        "item3": matchData["item3"],
-        "item4": matchData["item4"],
-        "item5": matchData["item5"],
-        "item6": matchData["item6"],
-        "spellId1": matchData["summoner1Id"],
-        "spellId2": matchData["summoner2Id"],
-        "doubleKills": matchData["doubleKills"],
-        "tripleKills": matchData["tripleKills"],
-        "quadraKills": matchData["quadraKills"],
-        "pentaKills": matchData["pentaKills"],
-        "cs": matchData["totalMinionsKilled"],
-        "rune1": styles[0],
-        "rune2": styles[1]
-    }
 
     return matchHistory
 
@@ -82,7 +58,7 @@ def profile():
         profileData = profile_functions()
         matchHistory = matches_functions()
 
-        return render_template('profile.html', profileData=profileData)#, matchHistory=matchHistory)
+        return render_template('profile.html', profileData=profileData, matchHistory=matchHistory)
     return 'wrong'
 
 if __name__ == '__main__':

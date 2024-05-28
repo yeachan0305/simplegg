@@ -119,8 +119,6 @@ def get_matches_data( matchId=None, gameName=None, region='asia'):
             break
 
     return response.json()['info']['participants'][index], gameMode
-    # return response.json()
-    # 그냥 json()파일로 내보내야 매치히스토리가 편함
 
 def win_rate20( puuid=None, gameName=None):
     """puuid에서 사용자의 최근 20판 승률계산.
@@ -203,39 +201,49 @@ def ddragon_get_runes_dict(version="10.6.1"):
 
     return perk_dict , rune_dict, perk_img_dict
 
-
-# Usage
-api_key = 'RGAPI-6e7e14a6-294b-4ff7-8e37-310b3154418e'
-gameName = 'Viroer'
-tag_line = 'KR1'
-
-puuid = api_get_puuid(gameName, tag_line)
-account_data = get_summoner_account_data(puuid)
-id = account_data['id']
-
-# a = get_matches_data('KR_7087492574', gameName)
-# print(a)
-
-def matches_functions():
-
-    matchId = 'KR_7087492574'
+def matchdata_parsing(matchId=None, gameName=None):
 
     matchData, gameMode = get_matches_data(matchId, gameName)
-    # rune = [style['style'] for style in matchData['perks']['styles']]
 
+    #스펠이랑 룬 ID값으로 이름 찾아오기
     spell_dict = ddragon_get_spell_dict()
     perk_dict , rune_dict , perk_img_dict = ddragon_get_runes_dict()
 
+    #룬 Key값들 파싱
     rune1Main = matchData["perks"]["styles"][0]["style"]
     rune1Sub = matchData["perks"]["styles"][0]["selections"][0]["perk"]
     rune2Main = matchData["perks"]["styles"][1]["style"]
 
-    matchHistory = {
+    #승패 여부
+    if matchData["win"] == True:
+        win = "win"
+    else:
+        win = "Lose"
+
+    #게임시간 (ms -> m 변환)
+    gameLength = int(matchData["challenges"]["gameLength"])//60
+
+    #룬 아이콘 링크가 옛날버전이라 영감이 없음.
+    if perk_dict[rune2Main] == "Inspiration":
+        rune2 = 'Whimsy'
+    else: 
+        rune2 = perk_dict[rune2Main]
+
+    #아이템이 있는경우 아이템이미지링크, 없으면 빈 네모. (아이템이 없으면 id가 0)
+    itemIcons = []
+    for i in range(7):
+        n = f'item{i}'
+        if matchData[n] == 0:
+            itemIcons.append( "url_for('static', filename='images/itemEmpty.png')" )
+        else:
+            itemIcons.append(f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/item/{matchData[n]}.png")
+
+    matches = {
         "gameMode": gameMode,
-        "win": matchData["win"],
+        "win": win,
         "championId": matchData["championId"],
         "championName": matchData["championName"],
-        "gameLength": matchData["challenges"]["gameLength"],
+        "gameLength": gameLength,
         'kills': matchData['kills'],
         "deaths": matchData["deaths"],
         'assists': matchData['assists'],
@@ -247,23 +255,53 @@ def matches_functions():
         "cs": matchData["totalMinionsKilled"],
         "rune1": matchData["perks"]["styles"][0]["selections"][0]["perk"],
         "rune2": matchData["perks"]["styles"][1]["style"],
-
+        
         "champIcon": f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/champion/{matchData["championName"]}.png",
-        "item0Icon": f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/item/{matchData["item0"]}.png",
-        "item1Icon": f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/item/{matchData["item1"]}.png",
-        "item2Icon": f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/item/{matchData["item2"]}.png",
-        "item3Icon": f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/item/{matchData["item3"]}.png",
-        "item4Icon": f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/item/{matchData["item4"]}.png",
-        "item5Icon": f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/item/{matchData["item5"]}.png",
-        "item6Icon": f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/item/{matchData["item6"]}.png",
+        "item0Icon": itemIcons[0],
+        "item1Icon": itemIcons[1],
+        "item2Icon": itemIcons[2],
+        "item3Icon": itemIcons[3],
+        "item4Icon": itemIcons[4],
+        "item5Icon": itemIcons[5],
+        "item6Icon": itemIcons[6],
         "spell1Icon": f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/spell/{spell_dict[matchData["summoner1Id"]]}.png",
         "spell2Icon": f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/spell/{spell_dict[matchData["summoner2Id"]]}.png",
         "rune1Icon": f"https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/{perk_dict[rune1Main]}/{rune_dict[rune1Sub]}/{rune_dict[rune1Sub]}.png",
-        "rune2Icon": f"https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/{perk_img_dict[rune2Main]}_{perk_dict[rune2Main]}.png"
+        "rune2Icon": f"https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/{perk_img_dict[rune2Main]}_{rune2}.png"
     }
-    return matchHistory
+    return matches
+#아이템이 없는 경우 구현
 
-a = matches_functions()
-print(a)
 
-#match function 기능 더 구현하기. 게임 개수만큼 데이터셋 생성.
+# Usage
+api_key = 'RGAPI-6e7e14a6-294b-4ff7-8e37-310b3154418e'
+# gameName = 'Viroer'
+# tag_line = 'KR1'
+
+# puuid = api_get_puuid(gameName, tag_line)
+# account_data = get_summoner_account_data(puuid)
+# id = account_data['id']
+
+# a = get_matches_data('KR_7087492574', gameName)
+# print(a)
+
+# def matches_functions(gameName, tag_line):
+
+#     matchHistory = [
+#         # {'date': '2024-05-27', 'data': 'data1', 'result': 'Win'},
+#         # {'date': '2024-05-26', 'data': 'data2', 'result': 'Lose'},
+#         # 여기 매치 데이터 추가해야함.
+#     ]
+
+#     matchIds = get_summoner_matchId(api_get_puuid(gameName, tag_line))
+#     for i in range(len(matchIds)):
+#         matches = matchdata_parsing(matchIds[i], gameName)
+#         matchHistory.append(matches)
+
+
+#     return matchHistory
+
+# a = matches_functions(gameName, tag_line)
+# print(a[5])
+
+#아이콘 파일 수정해야함

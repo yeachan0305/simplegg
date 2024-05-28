@@ -18,14 +18,28 @@
 
         <div class="match-history">
             <h2>최근 게임</h2>
-            <!-- Add match history here -->
-            <!-- Example: -->
+            {% for match in matchHistory %}
             <div class="match">
-                <p class="match-info">Date: <span>2024-05-27</span></p>
-                <p class="match-info">data: <span>data</span></p>
-                <p class="match-info">Result: <span>Win</span></p>
-                <!-- Add more match info as needed -->
+                <p class="match-info"><span>{{ match.gameMode }}</span></p>
+                <p class="match-info"><span>{{ match.win }}</span></p>
+                <p class="match-info"><span>{{ match.gameLength }}분</span></p>
+                <p class="match-info"><span>{{ match.kills }} / {{ match.deaths }} / {{ match.assists }}</span></p>
+                <p class="match-info"><span>{{ match.kda }} 평점</span></p>
+                <p class="match-info"><span>CS {{ match.cs }}</span></p>
+                
+                <img src="{{ match.champIcon }}" alt="champIcon">
+                <img src="{{ match.item0Icon }}" alt="item0Icon icon">
+                <img src="{{ match.item1Icon }}" alt="item1Icon icon">
+                <img src="{{ match.item2Icon }}" alt="item2Icon icon">
+                <img src="{{ match.item3Icon }}" alt="item3Icon icon">
+                <img src="{{ match.item4Icon }}" alt="item4Icon icon">
+                <img src="{{ match.item5Icon }}" alt="item5Icon icon">
+                <img src="{{ match.item6Icon }}" alt="item6Icon icon">
+                <img src="{{ match.spell1Icon }}" alt="spell1Icon icon">
+                <img src="{{ match.rune1Icon }}" alt="rune1Icon icon">
+                <img src="{{ match.rune2Icon }}" alt="rune2Icon icon">
             </div>
+            {% endfor %}
         </div>
     </div>
 </body>
