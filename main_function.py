@@ -1,5 +1,7 @@
 import requests
 
+from flask import url_for
+
 def api_get_puuid( gameName=None, tagLine=None, region='asia'):
     """riot_id 및 riot_tag에서 puuid를 가져오기.
 
@@ -234,7 +236,7 @@ def matchdata_parsing(matchId=None, gameName=None):
     for i in range(7):
         n = f'item{i}'
         if matchData[n] == 0:
-            itemIcons.append( "url_for('static', filename='images/itemEmpty.png')" )
+            itemIcons.append(url_for('static', filename='images/itemEmpty.png'))
         else:
             itemIcons.append(f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/item/{matchData[n]}.png")
 
