@@ -1,48 +1,274 @@
 body {
     font-family: Arial, sans-serif;
     background-color: #47495e;
+    margin: 0;
 }
 
 .profile-container {
-    max-width: 800px;
+    width: 100vw;
     margin: 0 auto;
+}
+
+.background {
+    background-image: url(https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aatrox_0.jpg);
+    background-size: cover; /* Ensure the image covers the container */
+    background-position: center; /* Center the image */
+    background-attachment: fixed; /* Ensure the image stays fixed in position */
+    height: 290px; /* Set the fixed height */
+    width: 100vw; /* Make the background container full width */
+    display: flex;
+    align-items: center;
     padding: 20px;
+    box-sizing: border-box;
+}
+
+.sub-background {
+    background-color: #414252;
+    width: 100vw;
+    height: 60px;
+}
+
+.profile-header {
+    display: inline-block;
+    display: flex;
+    align-items: center;
+    position: relative;
+    top: 53%;
+    
 }
 
 .profile-info {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* 각 요소 사이의 간격을 조절할 수 있습니다 */
+}
+
+.profile-info img{
+    width: 105px;
+    float: left;
+    border-radius: 100%;
+    border: 5px #a4b6d4;
+    border-style: solid;
+}
+
+
+#claim-profile {
+    position: absolute;
+    width: 100px;
+    height: 40px;
+    top: 20px;
+    border-radius: 5%;
     background-color: #414252;
-    padding: 20px;
+    border:none;
+    box-shadow: 0px 0px 1px 1px rgb(46, 46, 46);
+}
+
+.row {
+    display: flex;
+    gap: 10px; /* 각 요소 사이의 간격을 조절할 수 있습니다 */
+}
+
+.game-name .name {
+    position: relative;
+    font-size: 50px;
+    color:#a4b6d4;
+    margin-left: 10px;
+}
+
+.game-name .tagline {
+    position: relative;
+    font-size: 50px;
+    color:#a4b6d4;
+    margin-left: 10px;
+    padding-right: 5px;
+    padding-left: 8px;
+    background-color: rgba(150, 150, 150, 0.2);
+    border-radius: 10%;
+}
+
+.game-name .inGame {
+    position: relative;
+    font-size: 30px;
+    margin-left: 20px;
+    margin-top: 20px;
+    color:#737c8b;
+}
+
+.game-name .level {
+    position: relative;
+    font-size: 29px;
+    margin-left: 20px;
+    margin-top: 20px;
+    color:#a4b6d4;
+}
+
+.profile-info .game-name img {
+    position: absolute;
+    width: 15%;
+    float: none;
+    border-radius: 0;
+    border: none;
+    margin-left: 250px;
+    margin-top: 10px;
+}
+
+/* .sub-data {
+    display: inline-block;
+    background-color: black;;
+    width: 30%;
+    height: auto;
+    margin-left: 15px;
+    margin-right: 10px;
+    margin-top: 15px;
+}
+
+.tier {
+    background-color: #414252;
+    height: 200px;
     border-radius: 10px;
 }
 
-.profile-info .info {
-    margin-bottom: 10px;
-    color: #a4b6d4;
+.tier img{
+    position: flex;
+    height: 65%;
+    width: 50;
+    margin: 30px;  
 }
 
-.profile-info .info span {
-    font-weight: bold;
-    color: #a4b6d4;
+.tier .rank{
+    position: flex;
+    font-size: 40px;
+    color:#a4b6d4;
+    top: 40px;
 }
+
+.tier .point{
+    position: relative;
+    font-size: 30px;
+    color:#a4b6d4;
+    top: 50px;
+}
+
+.tier .lp{
+    position: relative;
+    font-size: 25px;
+    color:#a4b6d4;
+    top: 53px;
+}
+
+.mastery {
+    background-color: green;
+    height: 200px;
+    margin-top: 20px;
+    border-radius: 10px;
+} */
+
 
 .match-history {
-    margin-top: 20px;
-    color: #a4b6d4; 
+    align-items: center;
+    display: inline-block;
+    width: 100vw;
+    font-family: Arial, sans-serif;
+    color: #a4b6d4;
+    /* background-color: red; */
+
 }
 
-.match {
-    background-color: #414252;
+.match.win {
+    display: flex;
+    float: none;
+    align-items: center;
+    background:  linear-gradient(to right, #4CAF50 , #414252 2%);
     padding: 10px;
-    margin-bottom: 10px;
+    border-radius: 10px;
+    position: relative;
+    margin: 10px auto;
+    width: 85%; /* 박스의 전체 너비를 100%로 설정 */
+}
+
+.match.lose {
+    display: flex;
+    float: none;
+    align-items: center;
+    background:  linear-gradient(to right, #F44336 , #414252 2%);
+    padding: 10px;
+    border-radius: 10px;
+    position: relative;
+    margin: 10px auto;
+    width: 85%; /* 박스의 전체 너비를 100%로 설정 */
+}
+
+/* .match-colorbox {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 10px;
+    height: 100%;
+    border-radius: 10%;
+} */
+
+/* .match-colorbox.win {
+    background-color: #4CAF50; /* 승리시 초록색
+}*/
+
+/* .match-colorbox.lose {
+    background-color: #F44336; /* 패배시 빨간색
+}*/
+
+.match-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-right: 20px;
+}
+
+.match-info p {
+    margin: 2px 0;
+}
+
+.main-icons {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.char-icon img{
+    width: 80px; /* 부모의 너비에 맞춤 */
+    /*height: 70%; /*부모의 높이에 맞춤 */
+    object-fit: cover; /*이미지가 부모 크기에 맞게 조절되도록 함*/
+    margin-right: 10px;
+}
+
+.spell-icons img,
+.rune-icons img {
+    width: 30px;
+    height: 30px;
+    margin-right: 5px;
     border-radius: 5px;
 }
 
-.match-info {
-    margin-bottom: 5px;
-    color: #a4b6d4;
+
+.match-stats {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-right: 20px;
 }
 
-.match-info span {
-    font-weight: bold;
-    color: #a4b6d4;
+.match-stats p {
+    margin: 2px 0;
+}
+
+.item-icons {
+    display: flex;
+    align-items: center;
+}
+
+.item-icons img {
+    width: 30px;
+    height: 30px;
+    margin-right: 5px;
+    border-radius: 5px;
 }

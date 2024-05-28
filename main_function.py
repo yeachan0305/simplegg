@@ -194,7 +194,7 @@ def ddragon_get_spell_dict(version="14.10.1"):
 
     return spell_dict
 
-def ddragon_get_runes_dict(version="10.6.1"):
+def ddragon_get_runes_dict(version="14.10.1"):
     url = f"http://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/runesReforged.json"
     html = requests.get(url).json()
     rune_dict = {rune["id"]: rune["key"] for item in html for slot in item["slots"] for rune in slot["runes"]}
@@ -249,7 +249,7 @@ def matchdata_parsing(matchId=None, gameName=None):
         'kills': matchData['kills'],
         "deaths": matchData["deaths"],
         'assists': matchData['assists'],
-        "kda": matchData["challenges"]["kda"],
+        "kda": round(matchData["challenges"]["kda"], 2),
         "doubleKills": matchData["doubleKills"],
         "tripleKills": matchData["tripleKills"],
         "quadraKills": matchData["quadraKills"],
@@ -272,17 +272,19 @@ def matchdata_parsing(matchId=None, gameName=None):
         "rune2Icon": f"https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/{perk_img_dict[rune2Main]}_{rune2}.png"
     }
     return matches
-#아이템이 없는 경우 구현
+#아이템이 없는 경우 구현"10.6.1"
 
 
 # Usage
-api_key = 'RGAPI-6e7e14a6-294b-4ff7-8e37-310b3154418e'
-# gameName = 'Viroer'
-# tag_line = 'KR1'
+api_key = 'RGAPI-141ae431-067a-4a05-946d-2030aba68f18'
+# gameName = '산타 질리언'
+# tag_line = '1225'
 
 # puuid = api_get_puuid(gameName, tag_line)
 # account_data = get_summoner_account_data(puuid)
 # id = account_data['id']
+
+# print(puuid)
 
 # a = get_matches_data('KR_7087492574', gameName)
 # print(a)
@@ -306,4 +308,6 @@ api_key = 'RGAPI-6e7e14a6-294b-4ff7-8e37-310b3154418e'
 # a = matches_functions(gameName, tag_line)
 # print(a[5])
 
-#아이콘 파일 수정해야함
+# a = get_summoner_matchId(puuid)
+# # a = get_matches_data('KR_7088339652', gameName)
+# print(a)
