@@ -11,14 +11,18 @@ def profile_functions():
     puuid = api_get_puuid(inputs[0], inputs[1])
     accountData = get_summoner_account_data(puuid)
     summonerGameData = get_summoner_game_data(accountData['id'])
-    winRate = win_rate20(puuid,inputs[0])
+    winRate = win_rate20(puuid, inputs[0])
 
-    if len(summonerGameData) == 1:
-        tier = f'{summonerGameData['tier']} {summonerGameData['rank']} - {summonerGameData['leaguePoints']}LP'
+    #챔피언 숙련도 불러오기
+    mastery = get_mastery(puuid)
+    champ_dict = get_champ_dict()
+
+    if len(summonerGameData) >= 1:
+        tier = summonerGameData['tier']
     else:
-        tier = 'unranked'
+        tier = 'UNRANKED'
 
-    tierImg = url_for('static', filename=f'images/rank/Rank={summonerGameData['tier']}.png')
+    tierImg = url_for('static', filename=f'images/rank/Rank={tier}.png')
 
     profileData = {
         'name': inputs[0],
@@ -27,12 +31,31 @@ def profile_functions():
         'id': accountData['id'],
         'icon': f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/profileicon/{accountData['profileIconId']}.png",
         'tier': tier,
+        'rank': 0,
+        'lp': 0,
         'winRate': round(winRate[0], 1),
         'win': winRate[1],
         'lose': winRate[2],
-        'inGame': in_game(puuid),
-        'tierIcon': tierImg
+        'inGame': spectator(puuid),
+        'tierIcon': tierImg,
+
+        'championId1':mastery['championId1'],
+        'championId2':mastery['championId2'],
+        'championId3':mastery['championId3'],
+        'championLevel1':mastery['championLevel1'],
+        'championLevel2':mastery['championLevel2'],
+        'championLevel3':mastery['championLevel3'],
+        'championPoints1':mastery['championPoints1'],
+        'championPoints2':mastery['championPoints2'],
+        'championPoints3':mastery['championPoints3'],
+        'champbackground':f'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/{champ_dict[mastery['championId1']]}_0.jpg'
     }
+
+    if tier == 'UNRANKED':
+        pass
+    else:
+        profileData['rank'] = summonerGameData['rank']
+        profileData['lp'] = summonerGameData['leaguePoints']
 
     return profileData
 
@@ -61,7 +84,7 @@ def profile():
         profileData = profile_functions()
         matchHistory = matches_functions()
 
-        return render_template('profile v3.html', profileData=profileData, matchHistory=matchHistory)
+        return render_template('profile v4.html', profileData=profileData, matchHistory=matchHistory)
     return 'wrong'
 
 if __name__ == '__main__':
@@ -69,17 +92,10 @@ if __name__ == '__main__':
 
 #이름 검색 안되면 오류 말고 다른창 띄우기
 #솔랭, 일겜 구분
-#온라인 오프라인 적용안됨
-#get_summoner_game_data queutype이 여러개라서 수정했음
-#여진 아이콘 안나옴, 랭크 아이콘 크기수정 (이름 길이가 티어 이미지까지 오면 이미지가 아래로감   )(혹시 파일마다 크기가 다른가?) + 언랭크 아이콘 추가
-#프로필 텍스트들 no warp 적용시키기
+#랭크 아이콘 크기수정 (이름 길이가 티어 이미지까지 오면 이미지가 아래로감   )(혹시 파일마다 크기가 다른가?) + 언랭크 아이콘 추가
 #매치데이터 수가 0인경우도 생각해야함
 #claim profile 버튼 구현
 
-#챔프 숙련도 1개 뽑아오기 + 그걸로 메인 프로필이미지
-# https://kr.api.riotgames.com/lol/champion-mastery/v4/champion-masteries/by-puuid/
-# riODzRw9cp8dMNr29Jle17t50eoRWkl72e48TzZ7IDec8sVAbiYoDjTHyUEFY2QBYHI2mRKsttO8eA/
-# top?count=1&api_key=RGAPI-6e7e14a6-294b-4ff7-8e37-310b3154418e
 
 #게임 타입
 # https://static.developer.riotgames.com/docs/lol/queues.json

@@ -8,7 +8,7 @@
 </head>
 <body>
     <div class="profile-container">
-        <div class="background">
+        <div class="background" style="background-image: url('{{ profileData.champbackground }}');">
             <div class="profile-header">
                 <div class="profile-info">
                     <img src="{{ profileData.icon }}" alt="profile icon">
@@ -83,7 +83,7 @@
                 <p class="match-info-kda-rating">{{ match.kda }} 평점</p>
             </div>
             <div class="match-stats2">
-                <p class="multikill">트리플킬</p>
+                <p class="multiKills {{ 'empty' if match.multiKills == ' ' else 'multiKill' }}">{{ match.multiKills }}</p>
                 <p class="match-info cs">CS {{ match.cs }}</p>
             </div>
 

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Profile</title>
     <!-- <link rel="stylesheet" href="{{ url_for('static', filename='profile_styles.css') }}"> -->
-    <link rel="stylesheet" href="/static/profile_styles test.css">
+    <link rel="stylesheet" href="/static/profile_styles v4.css">
 </head>
 <body>
     <div class="profile-container">
@@ -107,7 +107,7 @@
                     <p class="match-info-kda-rating">5.00 평점</p>
                 </div>
                 <div class="match-stats2">
-                    <p class="multikill">트리플킬</p>
+                    <p class="multiKills {{ 'empty' if match.multiKills == ' ' else 'multiKill' }}">트리플킬</p>
                     <p class="match-info cs">CS 72</p>
                 </div>
 

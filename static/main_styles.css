@@ -71,6 +71,10 @@ main {
     align-items: center; /* 버튼을 수직으로 중앙 정렬 */
 }
 
+.buttons:hover {
+    background-color: #545569;
+}
+
 #search-button {
     padding: 10px 20px;
     border: none;

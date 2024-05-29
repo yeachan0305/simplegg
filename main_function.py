@@ -18,7 +18,13 @@ def api_get_puuid( gameName=None, tagLine=None, region='asia'):
     endpoint = f'riot/account/v1/accounts/by-riot-id/{gameName}/{tagLine}'
 
     response = requests.get(root_url+endpoint+'?'+'api_key='+api_key)
+
+    if "status" in response.json():
+        print('api_get_puuid -' + str(response.json()))
+        return 0
+
     puuid = response.json()['puuid']
+
     return puuid
 
 def get_summoner_account_data( puuid=None, region='kr'):
@@ -42,10 +48,14 @@ def get_summoner_account_data( puuid=None, region='kr'):
 
     response = requests.get(root_url+endpoint+'?'+'api_key='+api_key)
 
+    if "status" in response.json():
+        print('get_summoner_account_data -' + str(response.json()))
+        return 0
+
     return response.json()
 
 def get_summoner_game_data( id=None, region='kr'):
-    """소환사 id로 소환사의 게임내 정보들 받아오기.
+    """소환사 id로 소환사의 게임내 정보들 받아오기. 랭크가 없다면 값이 없는 리스트 반환함.
 
     Args:
         id (str, optional): 암호화된 소환사 id. Defaults == None.
@@ -71,13 +81,21 @@ def get_summoner_game_data( id=None, region='kr'):
 
     response = requests.get(root_url+endpoint+'?'+'api_key='+api_key)
 
+    if "status" in response.json():
+        print('get_summoner_game_data -' + str(response.json()))
+        return 0
+
     # target_queueType = "RANKED_SOLO_5x5"
     index = None
-
+    
+    #get_summoner_game_data queutype이 여러개라서 수정했음
     for i, participant in enumerate(response.json()):
         if participant["queueType"] == "RANKED_SOLO_5x5":
             index = i
             break
+    
+    if index == None:
+        return response.json()
 
     return response.json()[i]
 
@@ -99,6 +117,10 @@ def get_summoner_matchId( puuid=None, start=0, count=20, region='asia'):
 
     response = requests.get(f'{root_url}{endpoint}ids?start={start}&count={count}&api_key={api_key}')
 
+    if "status" in response.json():
+        print('get_summoner_matchId -' + str(response.json()))
+        return 0
+
     return response.json()
 
 def get_matches_data( matchId=None, gameName=None, region='asia'):
@@ -118,17 +140,20 @@ def get_matches_data( matchId=None, gameName=None, region='asia'):
 
     response = requests.get(root_url+endpoint+'?'+'api_key='+api_key)
 
+    if "status" in response.json():
+        print('get_matches_data -' + str(response.json()))
+        return 0
+
     gameMode = response.json()["info"]["gameMode"]
 
-    target_game_name = gameName
     index = None
 
     for i, participant in enumerate(response.json()['info']['participants']):
-        if participant['riotIdGameName'] == target_game_name:
+        if participant['riotIdGameName'] == gameName:
             index = i
             break
-
     return response.json()['info']['participants'][index], gameMode
+    # return response.json()
 
 def win_rate20( puuid=None, gameName=None):
     """puuid에서 사용자의 최근 20판 승률계산.
@@ -170,24 +195,70 @@ def spectator( puuid=None, region='kr'):
 
     response = requests.get(root_url+endpoint+'?'+'api_key='+api_key)
 
-    return response.json()
+    #오류 코드 분기점
+    if "status" in response.json():
+        if response.json()['status']['message'] == "Data not found - spectator game info isn't found":
+            return 'Offline'
+        else:
+            print('spectator -' + str(response.json()))
+            return 0
+    else:
+        return 'Online'
 
-def in_game( puuid=None):
-    """puuid에서 현재 사용자가 게임중인지 아닌지 체크
+def get_mastery( puuid=None, count=3, region='kr'):
+    """puuid에서 사용자의 캐릭터 숙련도를 가져오기.
 
     Args:
         puuid (str, optional): Player Universal Unique IDentifier. Defaults == None.
+        count (int, optional): 불러오고싶은 데이터 수의 양. 가장 높은것부터 차례대로 반환. Defaults == 3.
+        region (str, optional): Region. Defaults == 'kr'.
 
     Returns:
-        state (int): 사용자가 게임중이라면 1, 아니면 0
+        puuid (str) : Player Universal Unique IDentifier
     """
 
-    if 'status' in spectator(puuid):
-        state = 'Offline'
-    else:
-        state = 'Online'
+    root_url = f'https://{region}.api.riotgames.com/'
+    endpoint = f'lol/champion-mastery/v4/champion-masteries/by-puuid/{puuid}/top?count={count}&'
 
-    return state
+    response = requests.get(root_url+endpoint+'api_key='+api_key)
+
+    if "status" in response.json():
+        print('get_mastery -' + str(response.json()))
+        return 0
+
+    mastery = {
+        'championId1':response.json()[0]['championId'],
+        'championId2':response.json()[1]['championId'],
+        'championId3':response.json()[2]['championId'],
+
+        'championLevel1':response.json()[0]['championLevel'],
+        'championLevel2':response.json()[1]['championLevel'],
+        'championLevel3':response.json()[2]['championLevel'],
+
+        'championPoints1':response.json()[0]['championPoints'],
+        'championPoints2':response.json()[1]['championPoints'],
+        'championPoints3':response.json()[2]['championPoints'],
+    }
+
+    return mastery
+
+#spectator로 통합했음
+# def in_game( puuid=None):
+#     """puuid에서 현재 사용자가 게임중인지 아닌지 체크
+
+#     Args:
+#         puuid (str, optional): Player Universal Unique IDentifier. Defaults == None.
+
+#     Returns:
+#         state (int): 사용자가 게임중이라면 1, 아니면 0
+#     """
+
+#     if 'Offline' ==  spectator(puuid):
+#         state = 'Offline'
+#     else:
+#         state = 'Online'
+
+#     return state
 
 def ddragon_get_spell_dict(version="14.10.1"):
     url = f"https://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/summoner.json"
@@ -209,7 +280,25 @@ def ddragon_get_runes_dict(version="14.10.1"):
     perk_dict = {item["id"]: item["key"] for item in html}
     perk_img_dict = {8100:7200, 8000:7201, 8200:7202, 8300:7203, 8400:7204}
 
+    #여진 이름이 사전이랑 달라서 수정.
+    rune_dict[8439] = 'VeteranAftershock'
+
     return perk_dict , rune_dict, perk_img_dict
+
+def get_champ_dict(version="14.10.1"):
+    url = f"https://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/champion.json"
+    response = requests.get(url).json()["data"]
+
+    champId_dict= {
+
+    }
+    for champion_data in response.values():
+        champion_key = int(champion_data["key"])
+        champion_name = champion_data["id"]
+        champId_dict[champion_key] = champion_name
+
+    return champId_dict
+
 
 def matchdata_parsing(matchId=None, gameName=None):
 
@@ -247,7 +336,19 @@ def matchdata_parsing(matchId=None, gameName=None):
             itemIcons.append(url_for('static', filename='images/itemEmpty.png'))
         else:
             itemIcons.append(f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/item/{matchData[n]}.png")
-
+    
+    #멀티킬 데이터 정리
+    if matchData["pentaKills"] > 0:
+        multiKills = '펜타킬'
+    elif matchData["quadraKills"] > 0:
+        multiKills = '쿼드라킬'
+    elif matchData["tripleKills"] > 0:
+        multiKills = '트리플킬'
+    elif matchData["doubleKills"] > 0:
+        multiKills = '더블킬'
+    else:
+        multiKills = ' '
+    
     matches = {
         "gameMode": gameMode,
         "win": win,
@@ -258,10 +359,7 @@ def matchdata_parsing(matchId=None, gameName=None):
         "deaths": matchData["deaths"],
         'assists': matchData['assists'],
         "kda": round(matchData["challenges"]["kda"], 2),
-        "doubleKills": matchData["doubleKills"],
-        "tripleKills": matchData["tripleKills"],
-        "quadraKills": matchData["quadraKills"],
-        "pentaKills": matchData["pentaKills"],
+        'multiKills': multiKills,
         "cs": matchData["totalMinionsKilled"],
         "rune1": matchData["perks"]["styles"][0]["selections"][0]["perk"],
         "rune2": matchData["perks"]["styles"][1]["style"],
@@ -281,22 +379,21 @@ def matchdata_parsing(matchId=None, gameName=None):
     }
 
     return matches
-#아이템이 없는 경우 구현"10.6.1"
+#"10.6.1"
 
 
 # Usage
-api_key = 'RGAPI-141ae431-067a-4a05-946d-2030aba68f18'
-# gameName = 'Viroer'
-# tag_line = 'kr1'
+api_key = 'RGAPI-7282048e-b9ba-46a5-82c6-aeb706d2c804'
+# gameName = 'NekoL'
+# tag_line = '0214'
 
 # puuid = api_get_puuid(gameName, tag_line)
 # account_data = get_summoner_account_data(puuid)
 # id = account_data['id']
 
-# # print(puuid)
+# print(get_champ_dict())
 
-# # a = get_matches_data('KR_7087492574', gameName)
-# # print(a)
+# 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KaiSa_0.jpg'
 
 # def matches_functions(gameName, tag_line):
 

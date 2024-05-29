@@ -1,6 +1,6 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #47495e;
+    background-color: #0F141A;
     margin: 0;
 }
 
@@ -9,11 +9,43 @@ body {
     margin: 0 auto;
 }
 
+.top-box{
+    width: 100vw;
+    height: 50px;
+    background-color: #0F1923;
+    
+}
+
+.top-box img{
+    height: 50px;
+}
+
+.search-container {
+    position: absolute;
+    top: 9px;
+    right: 15px;
+}
+
+.search-container #search-box,
+.search-container #search-button {
+    border-radius: 5%;
+    background-color: #1B2733;
+    border: none;
+    box-shadow: 0px 0px 1px 1px rgb(46, 46, 46);
+    color:#a4b6d4;
+    padding: 7px;
+}
+
+.search-container #search-button:hover {
+    background-color: #0F141A;
+    box-shadow: 0px 0px 1px 1px rgb(46, 46, 46);
+    color:#a4b6d4;
+}
+
 .background {
-    background-image: url(https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aatrox_0.jpg);
+    /* background-image: url(https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aatrox_0.jpg); */
     background-size: cover; /* Ensure the image covers the container */
-    background-position: center; /* Center the image */
-    background-attachment: fixed; /* Ensure the image stays fixed in position */
+    background-position: 50% 20%; /* Center the image */
     height: 290px; /* Set the fixed height */
     width: 100vw; /* Make the background container full width */
     display: flex;
@@ -23,24 +55,29 @@ body {
 }
 
 .sub-background {
-    background-color: #414252;
+    background-color: #0F1923;
     width: 100vw;
     height: 60px;
+    border-bottom: 1px solid #1B2733;
 }
 
 .profile-header {
-    display: inline-block;
     display: flex;
     align-items: center;
     position: relative;
     top: 53%;
-    
+    width: 100vw;
+    max-width: 1400px; /* 컨테이너의 최대 너비를 설정 */
+    align-items: start;
+    margin: 1rem auto;
 }
 
 .profile-info {
     display: flex;
     align-items: center;
     gap: 10px; /* 각 요소 사이의 간격을 조절할 수 있습니다 */
+
+    max-width: 1400px;
 }
 
 .profile-info img{
@@ -56,11 +93,20 @@ body {
     position: absolute;
     width: 100px;
     height: 40px;
-    top: 20px;
+    top: 80px;
+    right: 10px;
     border-radius: 5%;
-    background-color: #414252;
-    border:none;
-    box-shadow: 0px 0px 1px 1px rgb(46, 46, 46);
+    background-color: #1B2733;
+    border: none;
+    box-shadow: 0px 0px 1px 1px #10171f;
+    color:#a4b6d4;
+    font-size: 17px;
+}
+
+#claim-profile:hover {
+    background-color: #0F141A;
+    box-shadow: 0px 0px 1px 1px #1B2733;
+    color:#a4b6d4;
 }
 
 .row {
@@ -73,6 +119,7 @@ body {
     font-size: 50px;
     color:#a4b6d4;
     margin-left: 10px;
+    text-shadow: -1px 0 #737c8b, 0 1px #737c8b, 1px 0 #737c8b, 0 -1px #737c8b;
 }
 
 .game-name .tagline {
@@ -84,6 +131,7 @@ body {
     padding-left: 8px;
     background-color: rgba(150, 150, 150, 0.2);
     border-radius: 10%;
+    text-shadow: -1px 0 #737c8b, 0 1px #737c8b, 1px 0 #737c8b, 0 -1px #737c8b;
 }
 
 .game-name .inGame {
@@ -109,105 +157,177 @@ body {
     border-radius: 0;
     border: none;
     margin-left: 250px;
-    margin-top: 10px;
+    margin-top: 20px;
 }
 
-/* .sub-data {
-    display: inline-block;
-    background-color: black;;
-    width: 30%;
-    height: auto;
-    margin-left: 15px;
-    margin-right: 10px;
-    margin-top: 15px;
+.main-container {
+    display: flex;
+    /* grid-template-columns: 100vw; */
+    align-items: start;
+
+    position: static;
+    max-width: 1400px;
+    width: calc(100% - 2rem);
+    margin: 1rem auto;
+}
+
+.sub-data {
+    width: 332px;
 }
 
 .tier {
-    background-color: #414252;
-    height: 200px;
-    border-radius: 10px;
+    background-color: #0F1923;
+    height: 170px;
+    border-radius: 4px;
+    border: 1px solid #1B2733;
 }
 
-.tier img{
-    position: flex;
-    height: 65%;
-    width: 50;
-    margin: 30px;  
-}
-
-.tier .rank{
-    position: flex;
+.tier p {
     font-size: 40px;
-    color:#a4b6d4;
-    top: 40px;
+    margin: 0px;
+    margin-left: 30px;
+    padding-top: 10px;
 }
 
-.tier .point{
-    position: relative;
-    font-size: 30px;
-    color:#a4b6d4;
-    top: 50px;
+.descript {
+    display: flex;
+    align-items: center;
 }
 
-.tier .lp{
-    position: relative;
-    font-size: 25px;
+.tier.tier-img {
+    margin-right: 10px;
+}
+
+.tier-img img{
+    width: 120px;
+    padding: 10px;
+    margin: 0px; 
+    margin-top: 10px;
+    margin-right: 10px;
+}
+
+.ranks {
+    flex: 1;
+    flex-direction: column;
+    margin-right: 30px;
+}
+
+.ranks .rank{
+    display: flex;
+    font-size: 20px;
     color:#a4b6d4;
-    top: 53px;
+}
+
+.ranks .tiers{
+    display: flex;
+    font-size: 20px;
+    color:#a4b6d4;
+}
+
+.ranks .row {
+    display: flex;
+}
+
+.ranks .point {
+    position: relative;
+    font-size: 50px;
+    color:#a4b6d4;
+
+}
+
+.ranks .lp {
+    position: relative;
+    font-size: 20px;
+    color:#a4b6d4;
+    margin-top: 25px;
 }
 
 .mastery {
-    background-color: green;
-    height: 200px;
-    margin-top: 20px;
-    border-radius: 10px;
-} */
+    background-color: #0F1923;
+    height: 240px;
+    margin-top: 10px;
+    border-radius: 4px;
+    border: 1px solid #1B2733;
+    color:#a4b6d4
+}
 
 
 .match-history {
+    flex:1;
     align-items: center;
-    display: inline-block;
-    width: 100vw;
+    width: 740px;
     font-family: Arial, sans-serif;
     color: #a4b6d4;
-    /* background-color: red; */
-
+    padding-left: 10px;
 }
 
-.match {
+.win-rate {
+    background-color: #0F1923;
+    height: 70px;
+    font-size: 25px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-top: 1px solid #1B2733;
+    border-left: 1px solid #1B2733;
+    border-right: 1px solid #1B2733;
+    
     display: flex;
     align-items: center;
-    background:  linear-gradient(to right, #4CAF50 , #414252 2%);
-    padding: 10px;
-    border-radius: 10px;
-    position: relative;
-    margin: 10px auto;
-    width: 85%;
+    padding-left: 20px;
+    padding-bottom: 2px;
+
+    margin-bottom: 2px;
 }
 
-/* .match.win {
+.match-endbox {
+    background-color: #0F1923;
+    height: 70px;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-bottom: 1px solid #1B2733;
+    border-left: 1px solid #1B2733;
+    border-right: 1px solid #1B2733;
+    
     display: flex;
-    float: none;
     align-items: center;
-    background:  linear-gradient(to right, #4CAF50 , #414252 2%);
+    padding-left: 20px;
+    padding-bottom: 3px;
+}
+
+
+/* .match {
+    display: flex;
+    align-items: center;
+    background:  linear-gradient(to right, #4CAF50 , #0F1923 2%);
     padding: 10px;
-    border-radius: 10px;
     position: relative;
-    margin: 10px auto;
-    width: 85%; 
+    margin: 0px auto;
+
+    border-left: 1px solid #1B2733;
+    border-right: 1px solid #1B2733;
+} */
+
+.match.win {
+    display: flex;
+    align-items: center;
+    background:  linear-gradient(to right, #4CAF50 , #0F1923 2%);
+    padding: 10px;
+    margin-bottom: 3px;
+    position: relative;
+    border-left: 1px solid #1B2733;
+    border-right: 1px solid #1B2733;
 }
 
 .match.lose {
     display: flex;
-    float: none;
     align-items: center;
-    background:  linear-gradient(to right, #F44336 , #414252 2%);
+    background:  linear-gradient(to right, #F44336 , #0F1923 2%);
     padding: 10px;
-    border-radius: 10px;
+    margin-bottom: 3px;
     position: relative;
-    margin: 10px auto;
-    width: 85%; 
-} */
+    border-left: 1px solid #1B2733;
+    border-right: 1px solid #1B2733;
+}
 
 /* 테스트용 주석 */
 
@@ -321,14 +441,20 @@ body {
     justify-content: center;  /* 수직 중앙 정렬 */
 }
 
-.multikill {
+.multiKills.empty {
     margin-bottom: -12px;
     margin-top: 12px;
 }
 
-/* .match-stats p {
-    margin: 2px 0;
-} */
+.multiKills.multiKill {
+    margin-bottom: -12px;
+    margin-top: 12px;
+    background-color: #DB3E33;
+    border-radius: 10px;
+    padding-left: 3px;
+    padding-right: 3px;
+    padding: 2px;
+}
 
 .item-icons {
     flex:1;
