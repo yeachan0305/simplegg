@@ -86,15 +86,7 @@ body {
     border-radius: 10%;
 }
 
-.inGame.Online {
-    position: relative;
-    font-size: 30px;
-    margin-left: 20px;
-    margin-top: 20px;
-    color:#4CAF50;
-}
-
-.inGame.Offline {
+.game-name .inGame {
     position: relative;
     font-size: 30px;
     margin-left: 20px;
@@ -182,8 +174,20 @@ body {
 
 }
 
-.match.win {
+.match {
     display: flex;
+    align-items: center;
+    background:  linear-gradient(to right, #4CAF50 , #414252 2%);
+    padding: 10px;
+    border-radius: 10px;
+    position: relative;
+    margin: 10px auto;
+    width: 85%;
+}
+
+/* .match.win {
+    display: flex;
+    float: none;
     align-items: center;
     background:  linear-gradient(to right, #4CAF50 , #414252 2%);
     padding: 10px;
@@ -195,6 +199,7 @@ body {
 
 .match.lose {
     display: flex;
+    float: none;
     align-items: center;
     background:  linear-gradient(to right, #F44336 , #414252 2%);
     padding: 10px;
@@ -202,7 +207,7 @@ body {
     position: relative;
     margin: 10px auto;
     width: 85%; 
-}
+} */
 
 /* 테스트용 주석 */
 

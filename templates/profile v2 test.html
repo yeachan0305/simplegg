@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='profile_styles.css') }}"> -->
+    <link rel="stylesheet" href="/static/profile_styles.css">
+</head>
+<body>
+    <div class="profile-container">
+        <div class="background">
+            <div class="profile-header">
+                <div class="profile-info">
+                    <img src="https://imgsvc.trackercdn.com/url/size(128),fit(cover)/https%3A%2F%2Ftrackercdn.com%2Fddragon%2Fcdn%2F14.10.1%2Fimg%2Fprofileicon%2F1378.png/image.jpg" alt="profile icon">
+                    <div class="game-name">
+                        <div class="row">
+                            <div class="name"><span>Viroer</span></div>
+                            <div class="tagline"><span>#kr1</span></div>
+                        </div>
+                        <div class="row">
+                            <div class="level"><span>LV. 212</span></div>
+                            <div class="inGame"><span>online</span></div>
+                            <img src="/static/images/rank/Rank=SILVER.png" alt="tier icon">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button type="button" id="claim-profile">Claim profile</button>
+        </div>
+        <div class="sub-background"> </div>
+    </div>
+            <!-- <p class="info">Tier: <span>{{ profileData.tier }}</span></p>
+            <p class="info">Win Rate last 20 games: <span>{{ profileData.winRate }} ({{ profileData.win }} wins - {{ profileData.lose }} loses)</span></p> -->
+    
+    <!-- <div class="sub-data">
+        <div class="tier">
+            <img src="static\images\rank\Rank=Master.png" alt="profile icon">
+            <div class="rank"><span>matser</span></div>
+                <div class="row">
+                    <div class="point"><span>1,210</span></div>
+                    <div class="lp"><span>LP</span></div>
+                </div>
+        </div>
+        <div class="mastery">
+
+        </div>
+    </div> -->
+
+
+    <div class="match-history">
+        {% for match in matchHistory %}
+        <div class="match {{ 'win' if match.win == 'win' else 'lose' }}">
+
+            <div class="match-info">
+                <div class="match-info-top">
+                    <p class="match-info-game-mode">ARAM</p>
+                </div>
+                <div class="match-info-bottom">
+                    <p class="match-info-win-status">win</p>
+                    <p class="match-info-game-length">19 분</p>
+                </div>
+            </div>
+
+            <div class="main-icons">
+                <div class="char-icon">
+                    <img src="https://ddragon.leagueoflegends.com/cdn/14.10.1/img/champion/Aatrox.png" alt="champIcon" class="champ-icon">
+                </div>
+                
+                <div class="spell-icons">
+                    <img src="https://trackercdn.com/cdn/tracker.gg/lol/spells/7.png" alt="spell1Icon icon">
+                    <img src="https://trackercdn.com/cdn/tracker.gg/lol/spells/4.png" alt="spell2Icon icon">
+                </div>
+
+                <div class="rune-icons">
+                    <img src='https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/Domination/DarkHarvest/DarkHarvest.png' alt="rune1Icon icon">
+                    <img src='https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/7201_Precision.png' alt="rune2Icon icon">
+                </div>
+
+            </div>
+                
+            <div class="match-stats1">
+                <p class="match-info-kda">20 / 5 / 5</p>
+                <p class="match-info-kda-rating">5.00 평점</p>
+            </div>
+            <div class="match-stats2">
+                <p class="multikill">트리플킬</p>
+                <p class="match-info cs">CS 72</p>
+            </div>
+
+            <div class="item-icons">
+                <div class="row1">
+                    <img src='https://ddragon.leagueoflegends.com/cdn/14.10.1/img/item/6676.png' alt="item0Icon icon">
+                    <img src='https://ddragon.leagueoflegends.com/cdn/14.10.1/img/item/3042.png' alt="item1Icon icon">
+                    <img src='https://ddragon.leagueoflegends.com/cdn/14.10.1/img/item/3158.png' alt="item2Icon icon">
+                    <img src='https://ddragon.leagueoflegends.com/cdn/14.10.1/img/item/2052.png' alt="item6Icon icon">
+                </div>
+                <div class="row2">
+                    <img src='https://ddragon.leagueoflegends.com/cdn/14.10.1/img/item/6692.png' alt="item3Icon icon">
+                    <img src='https://ddragon.leagueoflegends.com/cdn/14.10.1/img/item/2020.png' alt="item4Icon icon">
+                    <img src='https://ddragon.leagueoflegends.com/cdn/14.10.1/img/item/1036.png' alt="item5Icon icon">
+                    
+                </div>
+            </div>
+
+        </div>
+        {% endfor %}
+    </div>
+
+</body>
+</html>

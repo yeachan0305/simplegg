@@ -14,11 +14,11 @@ def profile_functions():
     winRate = win_rate20(puuid,inputs[0])
 
     if len(summonerGameData) == 1:
-        tier = f'{summonerGameData[0]['tier']} {summonerGameData[0]['rank']} - {summonerGameData[0]['leaguePoints']}LP'
+        tier = f'{summonerGameData['tier']} {summonerGameData['rank']} - {summonerGameData['leaguePoints']}LP'
     else:
         tier = 'unranked'
 
-    tierImg = url_for('static', filename=f'images/rank/Rank={summonerGameData[0]['tier']}.png')
+    tierImg = url_for('static', filename=f'images/rank/Rank={summonerGameData['tier']}.png')
 
     profileData = {
         'name': inputs[0],
@@ -33,6 +33,7 @@ def profile_functions():
         'inGame': in_game(puuid),
         'tierIcon': tierImg
     }
+
     return profileData
 
 def matches_functions():
@@ -60,7 +61,7 @@ def profile():
         profileData = profile_functions()
         matchHistory = matches_functions()
 
-        return render_template('testt2 copy.html', profileData=profileData, matchHistory=matchHistory)
+        return render_template('profile v3.html', profileData=profileData, matchHistory=matchHistory)
     return 'wrong'
 
 if __name__ == '__main__':
@@ -68,8 +69,10 @@ if __name__ == '__main__':
 
 #이름 검색 안되면 오류 말고 다른창 띄우기
 #솔랭, 일겜 구분
-#여진 아이콘 안나옴, 랭크 아이콘 크기수정 (혹시 파일마다 크기가 다른가?)
-#온라인 표시면 초록색으로 하기
+#온라인 오프라인 적용안됨
+#get_summoner_game_data queutype이 여러개라서 수정했음
+#여진 아이콘 안나옴, 랭크 아이콘 크기수정 (이름 길이가 티어 이미지까지 오면 이미지가 아래로감   )(혹시 파일마다 크기가 다른가?) + 언랭크 아이콘 추가
+#프로필 텍스트들 no warp 적용시키기
 #매치데이터 수가 0인경우도 생각해야함
 #claim profile 버튼 구현
 

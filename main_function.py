@@ -71,7 +71,15 @@ def get_summoner_game_data( id=None, region='kr'):
 
     response = requests.get(root_url+endpoint+'?'+'api_key='+api_key)
 
-    return response.json()
+    # target_queueType = "RANKED_SOLO_5x5"
+    index = None
+
+    for i, participant in enumerate(response.json()):
+        if participant["queueType"] == "RANKED_SOLO_5x5":
+            index = i
+            break
+
+    return response.json()[i]
 
 def get_summoner_matchId( puuid=None, start=0, count=20, region='asia'):
     """puuid로 사용자의 matchId들 받아오기
@@ -271,23 +279,24 @@ def matchdata_parsing(matchId=None, gameName=None):
         "rune1Icon": f"https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/{perk_dict[rune1Main]}/{rune_dict[rune1Sub]}/{rune_dict[rune1Sub]}.png",
         "rune2Icon": f"https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/{perk_img_dict[rune2Main]}_{rune2}.png"
     }
+
     return matches
 #아이템이 없는 경우 구현"10.6.1"
 
 
 # Usage
 api_key = 'RGAPI-141ae431-067a-4a05-946d-2030aba68f18'
-# gameName = '산타 질리언'
-# tag_line = '1225'
+# gameName = 'Viroer'
+# tag_line = 'kr1'
 
 # puuid = api_get_puuid(gameName, tag_line)
 # account_data = get_summoner_account_data(puuid)
 # id = account_data['id']
 
-# print(puuid)
+# # print(puuid)
 
-# a = get_matches_data('KR_7087492574', gameName)
-# print(a)
+# # a = get_matches_data('KR_7087492574', gameName)
+# # print(a)
 
 # def matches_functions(gameName, tag_line):
 
@@ -306,7 +315,7 @@ api_key = 'RGAPI-141ae431-067a-4a05-946d-2030aba68f18'
 #     return matchHistory
 
 # a = matches_functions(gameName, tag_line)
-# print(a[5])
+# print(a[0])
 
 # a = get_summoner_matchId(puuid)
 # # a = get_matches_data('KR_7088339652', gameName)

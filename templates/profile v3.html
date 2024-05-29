@@ -19,7 +19,7 @@
                         </div>
                         <div class="row">
                             <div class="level"><span>LV. {{ profileData.level }}</span></div>
-                            <div class="inGame"><span>{{ profileData.inGame }}</span></div>
+                            <div class="inGame {{ 'Online' if profileData.inGame == 'Online' else 'Offline' }}"><span>{{ profileData.inGame }}</span></div>
                             <img src="{{ profileData.tierIcon }}" alt="tier icon">
                         </div>
                     </div>
@@ -52,42 +52,49 @@
         <div class="match {{ 'win' if match.win == 'win' else 'lose' }}">
 
             <div class="match-info">
-                <p class="match-info game-mode">{{ match.gameMode }}</p>
-                <p class="match-info win-status">{{ match.win }}</p>
-                <p class="match-info game-length">{{ match.gameLength }}분</p>
+                <div class="match-info-top">
+                    <p class="match-info-game-mode">{{ match.gameMode }}</p>
+                </div>
+                <div class="match-info-bottom">
+                    <p class="match-info-win-status">{{ match.win }}</p>
+                    <p class="match-info-game-length">{{ match.gameLength }}분</p>
+                </div>
             </div>
 
             <div class="main-icons">
                 <div class="char-icon">
                     <img src="{{ match.champIcon }}" alt="champIcon" class="champ-icon">
                 </div>
-
+                
                 <div class="spell-icons">
                     <img src="{{ match.spell1Icon }}" alt="spell1Icon icon">
                     <img src="{{ match.spell2Icon }}" alt="spell2Icon icon">
                 </div>
 
                 <div class="rune-icons">
-                    <img src="{{ match.rune1Icon }}" alt="rune1Icon icon">
-                    <img src="{{ match.rune2Icon }}" alt="rune2Icon icon">
+                    <img src='{{ match.rune1Icon }}' alt="rune1Icon icon">
+                    <img src='{{ match.rune2Icon }}' alt="rune2Icon icon">
                 </div>
 
             </div>
                 
-            <div class="match-stats">
-                <p class="match-info kda">{{ match.kills }} / {{ match.deaths }} / {{ match.assists }}</p>
-                <p class="match-info kda-rating">{{ match.kda }} 평점</p>
+            <div class="match-stats1">
+                <p class="match-info-kda">{{ match.kills }} / {{ match.deaths }} / {{ match.assists }}</p>
+                <p class="match-info-kda-rating">{{ match.kda }} 평점</p>
+            </div>
+            <div class="match-stats2">
+                <p class="multikill">트리플킬</p>
                 <p class="match-info cs">CS {{ match.cs }}</p>
             </div>
 
             <div class="item-icons">
-                <div class="row">
+                <div class="row1">
                     <img src="{{ match.item0Icon }}" alt="item0Icon icon">
                     <img src="{{ match.item1Icon }}" alt="item1Icon icon">
                     <img src="{{ match.item2Icon }}" alt="item2Icon icon">
                     <img src="{{ match.item6Icon }}" alt="item6Icon icon">
                 </div>
-                <div class="row">
+                <div class="row2">
                     <img src="{{ match.item3Icon }}" alt="item3Icon icon">
                     <img src="{{ match.item4Icon }}" alt="item4Icon icon">
                     <img src="{{ match.item5Icon }}" alt="item5Icon icon">
