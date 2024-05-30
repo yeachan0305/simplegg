@@ -3,13 +3,13 @@ from main_function import *
 
 app = Flask(__name__)
 
-def profile_functions():
+def profile_functions(puuid):
     #입력값을 # 기준으로 쪼개기
     inputs = request.form['inputs'].split('#')
 
     #riot api로 데이터 불러오기
-    puuid = api_get_puuid(inputs[0], inputs[1])
     accountData = get_summoner_account_data(puuid)
+
     summonerGameData = get_summoner_game_data(accountData['id'])
     winRate = win_rate20(puuid, inputs[0])
 
@@ -59,13 +59,13 @@ def profile_functions():
 
     return profileData
 
-def matches_functions():
+def matches_functions(puuid):
     inputs = request.form['inputs'].split('#')
 
     matchHistory = [
     ]
 
-    matchIds = get_summoner_matchId(api_get_puuid(inputs[0], inputs[1]))
+    matchIds = get_summoner_matchId(puuid)
     for i in range(len(matchIds)):
         matches = matchdata_parsing(matchIds[i], inputs[0])
         matchHistory.append(matches)
@@ -73,19 +73,37 @@ def matches_functions():
 
     return matchHistory
 
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     return render_template('main.html')
 
-@app.route('/profile/', methods=['POST'])
+@app.route('/profile/', methods=['POST1','POST2'])
 def profile():
-    if request.method == 'POST':
-        profileData = profile_functions()
-        matchHistory = matches_functions()
+    if request.method == 'POST1':
+        inputs = request.form['inputs'].split('#')  
+        #puuid 중복 요청을 그냥 메인에서 하나로 함.
+        puuid = api_get_puuid(inputs[0], inputs[1])
+
+        profileData = profile_functions(puuid)
+        matchHistory = matches_functions(puuid)
+
+        cnt = get_api_request_count()
+        print(cnt)
 
         return render_template('profile v4.html', profileData=profileData, matchHistory=matchHistory)
-    return 'wrong'
+    elif request.method == 'POST2':
+        claim_profile()
+
+        inputs = request.form['inputs'].split('#')  
+        #puuid 중복 요청을 그냥 메인에서 하나로 함.
+        puuid = api_get_puuid(inputs[0], inputs[1])
+
+        profileData = profile_functions(puuid)
+        matchHistory = matches_functions(puuid)
+
+        cnt = get_api_request_count()
+        print(cnt)
+        return render_template('profile v4.html', profileData=profileData, matchHistory=matchHistory)
 
 if __name__ == '__main__':
     app.run(debug=True)

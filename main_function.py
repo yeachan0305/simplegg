@@ -1,7 +1,19 @@
 import requests
 
 from flask import url_for
+from functools import lru_cache
 
+#몇번 요청했는지 기록. riot api 1초에 10번 요청 가능함
+api_request_count = 0
+
+def increment_api_count():
+    global api_request_count
+    api_request_count += 1
+
+def get_api_request_count():
+    return api_request_count
+
+@lru_cache(maxsize=10000)
 def api_get_puuid( gameName=None, tagLine=None, region='asia'):
     """riot_id 및 riot_tag에서 puuid를 가져오기.
 
@@ -18,6 +30,7 @@ def api_get_puuid( gameName=None, tagLine=None, region='asia'):
     endpoint = f'riot/account/v1/accounts/by-riot-id/{gameName}/{tagLine}'
 
     response = requests.get(root_url+endpoint+'?'+'api_key='+api_key)
+    increment_api_count()
 
     if "status" in response.json():
         print('api_get_puuid -' + str(response.json()))
@@ -27,6 +40,7 @@ def api_get_puuid( gameName=None, tagLine=None, region='asia'):
 
     return puuid
 
+@lru_cache(maxsize=10000)
 def get_summoner_account_data( puuid=None, region='kr'):
     """puuid로 사용자의 계정정보 받아오기.
 
@@ -47,6 +61,7 @@ def get_summoner_account_data( puuid=None, region='kr'):
     endpoint = f'lol/summoner/v4/summoners/by-puuid/{puuid}'
 
     response = requests.get(root_url+endpoint+'?'+'api_key='+api_key)
+    increment_api_count()
 
     if "status" in response.json():
         print('get_summoner_account_data -' + str(response.json()))
@@ -54,6 +69,7 @@ def get_summoner_account_data( puuid=None, region='kr'):
 
     return response.json()
 
+@lru_cache(maxsize=10000)
 def get_summoner_game_data( id=None, region='kr'):
     """소환사 id로 소환사의 게임내 정보들 받아오기. 랭크가 없다면 값이 없는 리스트 반환함.
 
@@ -80,6 +96,7 @@ def get_summoner_game_data( id=None, region='kr'):
     endpoint = f'lol/league/v4/entries/by-summoner/{id}'
 
     response = requests.get(root_url+endpoint+'?'+'api_key='+api_key)
+    increment_api_count()
 
     if "status" in response.json():
         print('get_summoner_game_data -' + str(response.json()))
@@ -116,6 +133,7 @@ def get_summoner_matchId( puuid=None, start=0, count=20, region='asia'):
     endpoint = f'lol/match/v5/matches/by-puuid/{puuid}/'
 
     response = requests.get(f'{root_url}{endpoint}ids?start={start}&count={count}&api_key={api_key}')
+    increment_api_count()
 
     if "status" in response.json():
         print('get_summoner_matchId -' + str(response.json()))
@@ -123,6 +141,7 @@ def get_summoner_matchId( puuid=None, start=0, count=20, region='asia'):
 
     return response.json()
 
+@lru_cache(maxsize=10000)
 def get_matches_data( matchId=None, gameName=None, region='asia'):
     """matchId 및 gameName에서 해당 매치에서의 사용자 정보를 가져오기.
 
@@ -139,6 +158,7 @@ def get_matches_data( matchId=None, gameName=None, region='asia'):
     endpoint = f'lol/match/v5/matches/{matchId}'
 
     response = requests.get(root_url+endpoint+'?'+'api_key='+api_key)
+    increment_api_count()
 
     if "status" in response.json():
         print('get_matches_data -' + str(response.json()))
@@ -180,6 +200,7 @@ def win_rate20( puuid=None, gameName=None):
 
     return wins
 
+@lru_cache(maxsize=10000)
 def spectator( puuid=None, region='kr'):
     """puuid에서 현재 진행중인 게임 정보를 가져오기.
 
@@ -194,6 +215,7 @@ def spectator( puuid=None, region='kr'):
     endpoint = f'lol/spectator/v5/active-games/by-summoner/{puuid}'
 
     response = requests.get(root_url+endpoint+'?'+'api_key='+api_key)
+    increment_api_count()
 
     #오류 코드 분기점
     if "status" in response.json():
@@ -205,6 +227,7 @@ def spectator( puuid=None, region='kr'):
     else:
         return 'Online'
 
+@lru_cache(maxsize=10000)
 def get_mastery( puuid=None, count=3, region='kr'):
     """puuid에서 사용자의 캐릭터 숙련도를 가져오기.
 
@@ -221,6 +244,7 @@ def get_mastery( puuid=None, count=3, region='kr'):
     endpoint = f'lol/champion-mastery/v4/champion-masteries/by-puuid/{puuid}/top?count={count}&'
 
     response = requests.get(root_url+endpoint+'api_key='+api_key)
+    increment_api_count()
 
     if "status" in response.json():
         print('get_mastery -' + str(response.json()))
@@ -242,24 +266,7 @@ def get_mastery( puuid=None, count=3, region='kr'):
 
     return mastery
 
-#spectator로 통합했음
-# def in_game( puuid=None):
-#     """puuid에서 현재 사용자가 게임중인지 아닌지 체크
-
-#     Args:
-#         puuid (str, optional): Player Universal Unique IDentifier. Defaults == None.
-
-#     Returns:
-#         state (int): 사용자가 게임중이라면 1, 아니면 0
-#     """
-
-#     if 'Offline' ==  spectator(puuid):
-#         state = 'Offline'
-#     else:
-#         state = 'Online'
-
-#     return state
-
+@lru_cache(maxsize=10000)
 def ddragon_get_spell_dict(version="14.10.1"):
     url = f"https://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/summoner.json"
     html = requests.get(url).json()
@@ -273,6 +280,7 @@ def ddragon_get_spell_dict(version="14.10.1"):
 
     return spell_dict
 
+@lru_cache(maxsize=10000)
 def ddragon_get_runes_dict(version="14.10.1"):
     url = f"http://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/runesReforged.json"
     html = requests.get(url).json()
@@ -285,6 +293,7 @@ def ddragon_get_runes_dict(version="14.10.1"):
 
     return perk_dict , rune_dict, perk_img_dict
 
+@lru_cache(maxsize=10000)
 def get_champ_dict(version="14.10.1"):
     url = f"https://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/champion.json"
     response = requests.get(url).json()["data"]
@@ -299,7 +308,7 @@ def get_champ_dict(version="14.10.1"):
 
     return champId_dict
 
-
+@lru_cache(maxsize=10000)
 def matchdata_parsing(matchId=None, gameName=None):
 
     matchData, gameMode = get_matches_data(matchId, gameName)
@@ -381,6 +390,15 @@ def matchdata_parsing(matchId=None, gameName=None):
     return matches
 #"10.6.1"
 
+#프로필 갱신하기
+def claim_profile():
+
+    # 캐싱된 데이터들 삭제
+    get_summoner_account_data.cache_clear()
+    get_summoner_game_data.cache_clear()
+    spectator.cache_clear()
+    get_mastery.cache_clear()
+    matchdata_parsing.cache_clear()
 
 # Usage
 api_key = 'RGAPI-7282048e-b9ba-46a5-82c6-aeb706d2c804'
