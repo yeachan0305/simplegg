@@ -13,6 +13,10 @@ def increment_api_count():
 def get_api_request_count():
     return api_request_count
 
+def cnt_reset():
+    global api_request_count 
+    api_request_count = 0
+
 @lru_cache(maxsize=10000)
 def api_get_puuid( gameName=None, tagLine=None, region='asia'):
     """riot_id 및 riot_tag에서 puuid를 가져오기.
@@ -160,20 +164,30 @@ def get_matches_data( matchId=None, gameName=None, region='asia'):
     response = requests.get(root_url+endpoint+'?'+'api_key='+api_key)
     increment_api_count()
 
+    queues_dict = get_queues_dict()
+
     if "status" in response.json():
         print('get_matches_data -' + str(response.json()))
         return 0
 
     gameMode = response.json()["info"]["gameMode"]
+    queueId = queues_dict[response.json()['info']["queueId"]].replace('5v5 ', "").replace(' games', "").replace(" (Quickplay)", "")
 
+    #아레나 모드는 아직 아이콘파일이 없어서 제외함
+    if gameMode == 'CHERRY':
+        return 0,0,0
+
+    #소문자로 바꿔 비교해서 대소문자 관계없이 검색가능하게 함
+    #대신 바꿔입력한 값이 프로필에 뜨기때문에, 원래 게임 이름 가져오는코드 추가함
     index = None
-
+    originalGameName = ''
     for i, participant in enumerate(response.json()['info']['participants']):
-        if participant['riotIdGameName'] == gameName:
+        if participant['riotIdGameName'].lower() == gameName.lower():
             index = i
+            originalGameName = participant['riotIdGameName']
             break
-    return response.json()['info']['participants'][index], gameMode
-    # return response.json()
+
+    return response.json()['info']['participants'][index], queueId, originalGameName
 
 def win_rate20( puuid=None, gameName=None):
     """puuid에서 사용자의 최근 20판 승률계산.
@@ -185,18 +199,26 @@ def win_rate20( puuid=None, gameName=None):
         win (int) : 사용자의 최근 20판중 승리한 판수.
         lose (int) : 사용자의 최근 20판중 패배한 판수.
     """
+
     matchIds = get_summoner_matchId( puuid, count=20)
+    if len(matchIds) == 0:
+        return [0,0,0]
+    
     win = 0
+    lose = 0
     
     for i in range(20):
-        matchData, gameMode = get_matches_data(matchIds[i], gameName)
+        matchData, gameMode, originalGameName = get_matches_data(matchIds[i], gameName)
+        if matchData == 0:
+            continue
         if matchData['win'] == True:
             win += 1
+        else: 
+            lose += 1
 
-    winRate = win/20*100
-    lose = 20-win
+    winRate = win/(win+lose)*100
 
-    wins = [winRate, win, lose]
+    wins = [winRate, win, lose, originalGameName]
 
     return wins
 
@@ -228,7 +250,7 @@ def spectator( puuid=None, region='kr'):
         return 'Online'
 
 @lru_cache(maxsize=10000)
-def get_mastery( puuid=None, count=3, region='kr'):
+def get_mastery( puuid=None, count=3,  region='kr'):
     """puuid에서 사용자의 캐릭터 숙련도를 가져오기.
 
     Args:
@@ -250,19 +272,21 @@ def get_mastery( puuid=None, count=3, region='kr'):
         print('get_mastery -' + str(response.json()))
         return 0
 
-    mastery = {
-        'championId1':response.json()[0]['championId'],
-        'championId2':response.json()[1]['championId'],
-        'championId3':response.json()[2]['championId'],
+    mastery = [
+    ]
 
-        'championLevel1':response.json()[0]['championLevel'],
-        'championLevel2':response.json()[1]['championLevel'],
-        'championLevel3':response.json()[2]['championLevel'],
+    champ_dict = get_champ_dict()
 
-        'championPoints1':response.json()[0]['championPoints'],
-        'championPoints2':response.json()[1]['championPoints'],
-        'championPoints3':response.json()[2]['championPoints'],
-    }
+    for i in range(3):
+        if response.json()[i]['championLevel'] >= 10:
+            masteryLevel = 10
+        else:
+            masteryLevel = response.json()[i]['championLevel']
+
+        mastery.append({'championName':champ_dict[response.json()[i]['championId']],
+                        'championPoints':format(response.json()[i]['championPoints'], ','),
+                        'champIcon': f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/champion/{champ_dict[response.json()[i]['championId']]}.png",
+                        'masteryIcon':f'/static/images/mastery/Mastery_Level_{masteryLevel}_Crest.png'})
 
     return mastery
 
@@ -290,6 +314,7 @@ def ddragon_get_runes_dict(version="14.10.1"):
 
     #여진 이름이 사전이랑 달라서 수정.
     rune_dict[8439] = 'VeteranAftershock'
+    rune_dict[8008] = 'LethalTempoTemp'
 
     return perk_dict , rune_dict, perk_img_dict
 
@@ -309,10 +334,25 @@ def get_champ_dict(version="14.10.1"):
     return champId_dict
 
 @lru_cache(maxsize=10000)
+def get_queues_dict():
+    url = f"https://static.developer.riotgames.com/docs/lol/queues.json"
+    html = requests.get(url).json()
+    
+    queues_dict = {item["queueId"]: item["description"] for item in html}
+
+    # # data 내의 모든 key와 id 값을 추출하여 새로운 구조에 저장합니다.
+    # for key, value in html["description"].items():
+    #     id_value = int(value["queueId"])  # 'key' 값을 id_value로 저장
+    #     queues_dict[id_value] = key  # id_value를 키로, key를 값으로 저장
+
+    return queues_dict
+
 def matchdata_parsing(matchId=None, gameName=None):
 
-    matchData, gameMode = get_matches_data(matchId, gameName)
-
+    matchData, gameMode, _ = get_matches_data(matchId, gameName)
+    if matchData == 0:
+        return 0
+    
     #스펠이랑 룬 ID값으로 이름 찾아오기
     spell_dict = ddragon_get_spell_dict()
     perk_dict , rune_dict , perk_img_dict = ddragon_get_runes_dict()
@@ -322,14 +362,18 @@ def matchdata_parsing(matchId=None, gameName=None):
     rune1Sub = matchData["perks"]["styles"][0]["selections"][0]["perk"]
     rune2Main = matchData["perks"]["styles"][1]["style"]
 
+    #게임시간 (ms -> m 변환)
+    gameLength = int(matchData["challenges"]["gameLength"])//60
+
     #승패 여부
-    if matchData["win"] == True:
+    if matchData["win"] == True and gameLength < 3:
+        win = "Remake"
+    elif matchData["win"] == True:
         win = "win"
     else:
         win = "Lose"
 
-    #게임시간 (ms -> m 변환)
-    gameLength = int(matchData["challenges"]["gameLength"])//60
+    
 
     #룬 아이콘 링크가 옛날버전이라 영감이 없음.
     if perk_dict[rune2Main] == "Inspiration":
@@ -343,18 +387,19 @@ def matchdata_parsing(matchId=None, gameName=None):
         n = f'item{i}'
         if matchData[n] == 0:
             itemIcons.append(url_for('static', filename='images/itemEmpty.png'))
+            # itemIcons.append('test')
         else:
             itemIcons.append(f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/item/{matchData[n]}.png")
     
     #멀티킬 데이터 정리
     if matchData["pentaKills"] > 0:
-        multiKills = '펜타킬'
+        multiKills = "Penta Kills"
     elif matchData["quadraKills"] > 0:
-        multiKills = '쿼드라킬'
+        multiKills = "Quadra Kills"
     elif matchData["tripleKills"] > 0:
-        multiKills = '트리플킬'
+        multiKills = "Triple Kills"
     elif matchData["doubleKills"] > 0:
-        multiKills = '더블킬'
+        multiKills = "Double Kills"
     else:
         multiKills = ' '
     
@@ -369,7 +414,8 @@ def matchdata_parsing(matchId=None, gameName=None):
         'assists': matchData['assists'],
         "kda": round(matchData["challenges"]["kda"], 2),
         'multiKills': multiKills,
-        "cs": matchData["totalMinionsKilled"],
+        "cs": matchData["totalMinionsKilled"] + matchData["totalAllyJungleMinionsKilled"] + matchData['totalEnemyJungleMinionsKilled'],
+        'csPerMin': round((matchData["totalMinionsKilled"] + matchData["totalAllyJungleMinionsKilled"] + matchData['totalEnemyJungleMinionsKilled']) / gameLength, 1),
         "rune1": matchData["perks"]["styles"][0]["selections"][0]["perk"],
         "rune2": matchData["perks"]["styles"][1]["style"],
         
@@ -387,28 +433,142 @@ def matchdata_parsing(matchId=None, gameName=None):
         "rune2Icon": f"https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/{perk_img_dict[rune2Main]}_{rune2}.png"
     }
 
+    #치속 이미지를 ddragon.leagueoflegends에서 제공안함
+    if matches['rune1Icon'] == 'https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/Precision/LethalTempoTemp/LethalTempoTemp.png':
+        matches['rune1Icon'] = 'https://ddragon.canisback.com/img/perk-images/Styles/Precision/LethalTempo/LethalTempoTemp.png'
+
     return matches
 #"10.6.1"
+def champdata_analyze(matches):
+    champdata = []
+    for match in matches:
+        win_value = 1 if match['win'] == 'win' else 0
+        lose_value = 1 if match['win'] == 'Lose' else 0
+        data = {
+            'win': win_value,
+            'lose': lose_value,
+            'championId': match['championId'],
+            'championName': match['championName'],
+            'kills': match['kills'],
+            'deaths': match['deaths'],
+            'assists': match['assists'],
+            'cs': match['cs']
+        }
+        champdata.append(data)
+
+    return champdata
+
+def aggregate_champion_data(extracted_data, champ_dict):
+    champion_ids = list(set([data['championId'] for data in extracted_data]))  # 중복 제거된 championId 리스트
+    aggregated_data = {}
+
+    for champion_id in champion_ids:
+        if len(champ_dict[champion_id]) > 7:
+            championName = champ_dict[champion_id][:7] + '..'
+        else:
+            championName = champ_dict[champion_id]
+
+        aggregated_data[champion_id] = {
+            'championId': champion_id,
+            'championName': championName,
+            'championIcon': f'https://ddragon.leagueoflegends.com/cdn/14.10.1/img/champion/{champ_dict[champion_id]}.png',
+            'total_wins': 0,
+            'total_loses': 0,
+            'total_kills': 0,
+            'total_deaths': 0,
+            'total_assists': 0,
+            'total_cs': 0
+        }
+
+    for data in extracted_data:
+        champion_id = data['championId']
+        win = data['win']
+        lose = data['lose']
+        kills = data['kills']
+        deaths = data['deaths']
+        assists = data['assists']
+        cs = data['cs']
+
+        aggregated_data[champion_id]['total_wins'] += win
+        aggregated_data[champion_id]['total_loses'] += lose
+        aggregated_data[champion_id]['total_kills'] += kills
+        aggregated_data[champion_id]['total_deaths'] += deaths
+        aggregated_data[champion_id]['total_assists'] += assists
+        aggregated_data[champion_id]['total_cs'] += cs
+
+    sorted_data = sorted(aggregated_data.values(), key=lambda x: total_games(x), reverse=True)
+    top_5 = sorted_data[:5]
+
+    for data in top_5:
+        matches = data['total_wins'] + data['total_loses']
+        data['winRate'] = round(data['total_wins']/matches*100)
+        data['total_kills'] = round(data['total_kills']/matches, 1)
+        data['total_deaths'] = round(data['total_deaths']/matches, 1)
+        data['total_assists'] = round(data['total_assists']/matches, 1)
+        data['kda'] = round((data['total_kills']+data['total_assists'])/data['total_deaths'], 2)
+
+    return top_5
+
+def total_games(data):
+    total_wins = data['total_wins']
+    total_loses = data['total_loses']
+    total_games = total_wins + total_loses
+    return total_games
 
 #프로필 갱신하기
 def claim_profile():
-
     # 캐싱된 데이터들 삭제
     get_summoner_account_data.cache_clear()
     get_summoner_game_data.cache_clear()
     spectator.cache_clear()
     get_mastery.cache_clear()
-    matchdata_parsing.cache_clear()
 
 # Usage
-api_key = 'RGAPI-7282048e-b9ba-46a5-82c6-aeb706d2c804'
-# gameName = 'NekoL'
-# tag_line = '0214'
+api_key = 'RGAPI-4fa4675e-9bc8-45c5-ac63-ce9f7321e999'
+# gameName = '앞비전 후 뒤점멸'
+# tag_line = '4065'
+# def matches_functions(puuid):
+
+#     matchHistory = [
+#     ]
+
+#     matchIds = get_summoner_matchId(puuid)
+#     for i in range(len(matchIds)):
+#         matches = matchdata_parsing(matchIds[i], gameName)
+#         if matches == 0:
+#             continue
+#         matchHistory.append(matches)
+
+#     return matchHistory
 
 # puuid = api_get_puuid(gameName, tag_line)
 # account_data = get_summoner_account_data(puuid)
 # id = account_data['id']
 
+# a = get_matches_data('KR_7089315154', gameName)
+# print(puuid)
+
+# mastery = get_mastery(puuid)
+# print(mastery)
+# a = matches_functions(puuid)
+
+
+
+# b = aggregate_champion_data(champdata_analyze(a),champ_dict)
+# print(b)
+
+# print(account_data)
+# matchIds = get_summoner_matchId( puuid, count=20)
+# print(matchIds)
+
+# print(account_data)
+# a, gameMode = get_matches_data('KR_7090509464', gameName)
+# print(a, gameMode)
+
+# perk_dict , rune_dict, perk_img_dict = ddragon_get_runes_dict()
+# print(rune_dict)
+
+# profileData = profile_functions(puuid)
 # print(get_champ_dict())
 
 # 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KaiSa_0.jpg'
@@ -434,4 +594,4 @@ api_key = 'RGAPI-7282048e-b9ba-46a5-82c6-aeb706d2c804'
 
 # a = get_summoner_matchId(puuid)
 # # a = get_matches_data('KR_7088339652', gameName)
-# print(a)
+# print(a

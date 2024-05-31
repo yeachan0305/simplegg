@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile</title>
-    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='profile_styles.css') }}"> -->
-    <link rel="stylesheet" href="/static/profile_styles v4.css">
+    <title>{{ profileData.name }}#{{ profileData.tagline }} - Profile</title>
+    <link rel="stylesheet" href="/static/profile_styles v5 test.css">
+
     <!-- Message Flashing -->
     {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -16,16 +16,27 @@
     {% endwith %}
 </head>
 <body>
+     <!-- 로딩 이미지 -->
+     <div id="loading">
+        <img src="/static/images/Spin.gif" alt="Loading...">
+    </div>
+
+    {% block content %}
     
     <div class="profile-container">
         <div class="top-box">
             <div class="logo">
-                <img src="/static/images/logo.png" alt="simplegg Logo">
+                <a href="{{ url_for('index') }}">
+                    <img src="/static/images/logo.png" alt="simplegg Logo">
+                </a>
             </div>
             <div class="search-container">
                 <form action="/profile/" method="post" style="display: flex; justify-content: center;">
                     <div style="display: flex; align-items: center;">
-                        <input type="text" id="search-box" name="inputs" placeholder="Player + #tag">
+                        <div class='searchs' style="position: relative;">
+                            <img src="/static/images/search.png">
+                            <input type="text" id="search-box" name="inputs" placeholder="플레이어 이름 + #태그">
+                        </div>
                         <input type="hidden" name="action" value="POST1">
                     </div>
                 </form>
@@ -50,6 +61,7 @@
                     <input type="hidden" name="action" value="POST2">
                     <input type="hidden" name="inputs" value="{{ inputBuffer }}">
                     <button type="submit" id="claim-profile">Profile Updates</button>
+                    <img src="/static/images/autorenew.png">
                 </form>
             </div>
         </div>
@@ -58,6 +70,10 @@
     
     <div class="main-container">
         <div class="sub-data">
+            <div class="tier-title">
+                <img src="/static/images/rating.png">
+                <p>Current Rating</p>
+            </div>
             <div class="tier">
                 <div class="descript">
                     <div class="tier-img">
@@ -75,18 +91,77 @@
                 </div>
 
             </div>
-
+            
+            <div class="mastery-title">
+                <img src="/static/images/mastery.png">
+                <p>Mastery Points</p>
+            </div>
             <div class="mastery">
-                <p>숙련도 구현해야함</p>
+                {% for masterys in profileData.mastery %}
+                <div class="mastery1">
+                    <div class="champ-icon">
+                        <img src="{{ masterys.champIcon }}" alt="champ img">
+                    </div>
+                    <div class="mastery-icon">
+                        <img src="{{ masterys.masteryIcon }}" alt="champ img">
+                    </div>
+                    <div class="masterys">
+                        <div class="name"><span>{{masterys.championName}}</span></div>
+                        <div class="row">
+                            <div class="point"><span>{{masterys.championPoints}}</span></div>
+                            <div class="point-text"><span>points</span></div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="winrateTop5-title">
+                <img src="/static/images/top.png">
+                <p>Top Champions</p>
+            </div>
+
+            <div class="winrateTop5">
+                {% for data in winrateTop5Data %}
+                <div class="top5">
+                    <div class="winrate-champ-icon">
+                        <img src="{{ data.championIcon }}" alt="champ img">
+                    </div>
+                    <div class="char-data">
+                        <div class="row1">
+                            <div class="name"><span>{{ data.championName }}</span></div>
+                        </div>
+                        <div class="row2">
+                            <div class="kda"><span>{{ data.kda }}:1 KDA</span></div>
+                            <div class="point-text"><span>{{ data.total_kills }} / {{ data.total_deaths }} / {{ data.total_assists }}</span></div>
+                        </div>
+                        <div class="row3">
+                            <div class="winrate"><span>{{ data.winRate }}%</span></div>
+                            <div class="matches-cnt"><span>{{ data.total_wins+data.total_loses }} matches</span></div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="winrateTop5-end">
+                </div>
             </div>
             
         </div>
 
         <div class="match-history">
-            <div class="win-rate"> Last {{ profileData.win+profileData.lose }} Matches - {{ profileData.win }}W {{ profileData.lose }}L ( {{ profileData.winRate }}% ) </div>
+            <div class="wins">
+                <img src="/static/images/matches.png">
+                <div class="win-rate">Last {{ profileData.win+profileData.lose }} Matches - {{ profileData.win }}W {{ profileData.lose }}L ( {{ profileData.winRate }}% ) </div>
+            </div>
             {% for match in matchHistory %}
             
-            <div class="match {{ 'win' if match.win == 'win' else 'lose' }}">
+            <div class="match {% if match.win == 'win' %}
+                     win
+                 {% elif match.win == 'Remake' %}
+                     remake
+                 {% else %}
+                     lose
+                 {% endif %}">
 
                 <div class="match-info">
                     <div class="match-info-top">
@@ -122,7 +197,7 @@
                 </div>
                 <div class="match-stats2">
                     <p class="multiKills {{ 'empty' if match.multiKills == ' ' else 'multiKill' }}"> {{ match.multiKills }} </p>
-                    <p class="match-info cs">CS {{ match.cs }} ({{match.csPerMin}})</p>
+                    <p class="match-info-cs">CS {{ match.cs }} ({{match.csPerMin}})</p>
                 </div>
 
                 <div class="item-icons">
@@ -145,9 +220,30 @@
         </div>
     </div>
 
-    <div class="footer">
+    {% endblock %}
 
-    </div>
+    <script>
+        // 페이지가 로드되기 전 로딩 이미지를 표시
+        window.addEventListener('beforeunload', function() {
+            document.getElementById('loading').style.display = 'flex';
+        });
 
+        // 모든 콘텐츠가 로드된 후 로딩 이미지를 숨김
+        window.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('loading').style.display = 'none';
+        });
+
+        // 폼 제출 시 로딩 이미지를 표시
+        document.getElementById('profileForm').addEventListener('submit', function() {
+            document.getElementById('loading').style.display = 'flex';
+        });
+
+        // 뒤로가기 버튼을 클릭할 때 페이지 로드가 완료됐을 때를 검사하여 로딩 이미지를 숨깁니다.
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html>

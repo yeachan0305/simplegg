@@ -18,6 +18,7 @@ body {
 
 .top-box img{
     height: 50px;
+    margin-left: 5px;
 }
 
 .search-container {
@@ -25,21 +26,14 @@ body {
     top: 9px;
     right: 15px;
 }
-
-.search-container #search-box,
-.search-container #search-button {
+/* 1B2733 */
+.search-container #search-box {
     border-radius: 5%;
-    background-color: #1B2733;
+    background-color: #a4b6d4;
     border: none;
     box-shadow: 0px 0px 1px 1px rgb(46, 46, 46);
-    color:#a4b6d4;
+    color: #1c252e;
     padding: 7px;
-}
-
-.search-container #search-button:hover {
-    background-color: #0F141A;
-    box-shadow: 0px 0px 1px 1px rgb(46, 46, 46);
-    color:#a4b6d4;
 }
 
 .background {
@@ -135,12 +129,20 @@ body {
     text-shadow: -1px 0 #737c8b, 0 1px #737c8b, 1px 0 #737c8b, 0 -1px #737c8b;
 }
 
-.game-name .inGame {
+.inGame.Offline{
     position: relative;
     font-size: 30px;
     margin-left: 20px;
     margin-top: 20px;
     color:#737c8b;
+}
+
+.inGame.Online {
+    position: relative;
+    font-size: 30px;
+    margin-left: 20px;
+    margin-top: 20px;
+    color:#4CAF50;
 }
 
 .game-name .level {
@@ -178,9 +180,29 @@ body {
 
 .tier {
     background-color: #0F1923;
-    height: 170px;
-    border-radius: 4px;
+    height: 145px;
     border: 1px solid #1B2733;
+    
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.tier-title {
+    display: flex;
+    background-color: #0F1923;
+    height: 60px;
+    border: 1px solid #1B2733;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom: 0;
+    align-items: center;
+}
+
+.tier-title p{
+    margin-left: 15px;
+    color:#a4b6d4;
+    font-size: 25px;
 }
 
 .tier p {
@@ -217,6 +239,7 @@ body {
     display: flex;
     font-size: 20px;
     color:#a4b6d4;
+    margin-left: 4px;
 }
 
 .ranks .tiers{
@@ -245,12 +268,208 @@ body {
 
 .mastery {
     background-color: #0F1923;
-    height: 240px;
-    margin-top: 10px;
+    height: 270px;
     border-radius: 4px;
     border: 1px solid #1B2733;
-    color:#a4b6d4
+    color:#a4b6d4;
+    justify-content: center;
+    align-items: center;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
 }
+
+.mastery1 {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px
+}
+
+.champ-icon img{
+    width: 60px;
+    padding: 10px;
+    margin: 0px;
+    object-fit: cover;
+    border-radius: 17px;
+    margin-left: 10px;
+}
+
+.mastery-icon img{
+    width: 60px;
+    padding: 5px;
+    margin: 0px;
+    object-fit: cover;
+    margin-right: 10px;
+}
+
+.masterys {
+    flex: 1;
+    flex-direction: column;
+    margin-right: 30px;
+}
+
+.masterys .name{
+    display: flex;
+    font-size: 20px;
+    color:#a4b6d4;
+    margin-left: 3px;
+}
+
+.masterys .row {
+    display: flex;
+}
+
+.masterys .point {
+    position: relative;
+    font-size: 20px;
+    color:#a4b6d4;
+
+}
+
+.masterys .point-text {
+    position: relative;
+    font-size: 20px;
+    color:#a4b6d4;
+}
+
+.mastery-title {
+    display: flex;
+    background-color: #0F1923;
+    height: 60px;
+    border: 1px solid #1B2733;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom: 0;
+    align-items: center;
+}
+
+.mastery-title p{
+    margin-left: 15px;
+    color:#a4b6d4;
+    font-size: 25px;
+}
+
+/* 시작 */
+.winrateTop5 {
+    height: 240px;
+    color:#a4b6d4;
+    justify-content: center;
+    align-items: center;
+}
+
+.top5 {
+    position: relative; /* 부모 요소를 relative로 설정 */
+    display: flex;
+    align-items: center;
+    background-color: #0F1923;
+    border: 1px solid #1B2733;
+    border-bottom: 0;
+}
+
+.winrate-champ-icon img {
+    width: 40px;
+    padding: 10px;
+    margin: 0px;
+    object-fit: cover;
+    border-radius: 17px;
+    padding-right: 0px;
+}
+
+.char-data {
+    position: absolute; /* 자식 요소를 absolute로 설정 */
+    left: calc(40px + 10px); /* 왼쪽 여백 설정 (이미지의 너비 + 이미지와 char-data 사이의 간격) */
+    top: 50%; /* 부모 요소의 중앙에 배치하기 위해 top 위치를 50%로 설정 */
+    transform: translateY(-50%); /* 수직 정렬을 위해 translateY(-50%) 설정 */
+    width: 170px;
+}
+
+.char-data .row1 {
+    position: relative; /* 자식 요소를 relative로 설정 */
+    width: 45px; /* 고정 크기 설정 */
+    text-align: left;
+    white-space: nowrap;
+    top: 30px;
+    left: 10px;
+}
+
+.char-data .row2 {
+    position: relative; /* 자식 요소를 relative로 설정 */
+    width: 90px;
+    height: 33px;
+    text-align: center;
+    white-space: nowrap;
+    top: 2px;
+    left: 90px;
+}
+
+.char-data .row3 {
+    position: relative; /* 자식 요소를 relative로 설정 */
+    width: 70px; /* 고정 크기 설정 */
+    text-align: right;
+    white-space: nowrap;
+    top: -30px;
+    left: 200px;
+}
+
+.char-data .name{
+    display: flex;
+    font-size: 20px;
+    color:#a4b6d4;
+}
+
+.char-data .kda {
+    position: relative;
+    font-size: 16px;
+    color:#a4b6d4;
+    font-weight: bold;
+}
+
+.char-data .point-text {
+    position: relative;
+    font-size: 13px;
+    color:#a4b6d4;
+}
+
+.char-data .winrate {
+    position: relative;
+    font-size: 15px;
+    color:#a4b6d4;
+}
+
+.char-data .matches-cnt {
+    position: relative;
+    font-size: 12px;
+    color:#a4b6d4;
+}
+
+.winrateTop5-title {
+    display: flex;
+    background-color: #0F1923;
+    height: 60px;
+    border: 1px solid #1B2733;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom: 0;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.winrateTop5-title p{
+    margin-left: 15px;
+    color:#a4b6d4;
+    font-size: 25px;
+}
+
+.winrateTop5-end {
+    display: flex;
+    background-color: #0F1923;
+    height: 30px;
+    border: 1px solid #1B2733;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    align-items: center;
+}
+
+/* 끝 */
 
 
 .match-history {
@@ -296,17 +515,16 @@ body {
 }
 
 
-/* .match {
+.match {
     display: flex;
     align-items: center;
     background:  linear-gradient(to right, #4CAF50 , #0F1923 2%);
     padding: 10px;
+    margin-bottom: 3px;
     position: relative;
-    margin: 0px auto;
-
     border-left: 1px solid #1B2733;
     border-right: 1px solid #1B2733;
-} */
+}
 
 .match.win {
     display: flex;
@@ -330,7 +548,16 @@ body {
     border-right: 1px solid #1B2733;
 }
 
-/* 테스트용 주석 */
+.match.remake {
+    display: flex;
+    align-items: center;
+    background:  linear-gradient(to right, #6c6e75 , #0F1923 2%);
+    padding: 10px;
+    margin-bottom: 3px;
+    position: relative;
+    border-left: 1px solid #1B2733;
+    border-right: 1px solid #1B2733;
+}
 
 .match-info {
     width: 130px;
@@ -444,9 +671,21 @@ body {
     display: flex;
     align-items: center;  /* 수평 중앙 정렬 */
     justify-content: center;  /* 수직 중앙 정렬 */
+    background-color: red;
 }
 
-.multiKills.empty {
+.multiKills {
+    margin-bottom: -12px;
+    margin-top: 12px;
+    background-color: #962c24;
+    border-radius: 2px;
+    padding-left: 3px;
+    padding-right: 3px;
+    padding: 2px;
+    color: #c6d0e0;
+}
+
+/* .multiKills.empty {
     margin-bottom: -12px;
     margin-top: 12px;
 }
@@ -460,7 +699,8 @@ body {
     padding-right: 3px;
     padding: 2px;
     color: #c6d0e0;
-}
+} */
+
 
 .item-icons {
     flex:1;

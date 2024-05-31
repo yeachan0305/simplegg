@@ -2,12 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>Profile</title>
     <!-- <link rel="stylesheet" href="{{ url_for('static', filename='profile_styles.css') }}"> -->
-    <link rel="stylesheet" href="/static/profile_styles test.css">
+    <link rel="stylesheet" href="/static/profile_styles v5 test.css">
+    <!-- Message Flashing -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <script>
+                alert("{{messages[-1]}}")
+            </script>
+        {% endif %}
+    {% endwith %}
 </head>
 <body>
+    
     <div class="profile-container">
         <div class="top-box">
             <div class="logo">
@@ -16,16 +25,16 @@
             <div class="search-container">
                 <form action="/profile/" method="post" style="display: flex; justify-content: center;">
                     <div style="display: flex; align-items: center;">
-                        <input type="text" id="search-box" name="inputs" placeholder="플레이어 이름 + #태그">
-                        <button type="submit" id="search-button">Search</button>
+                        <input type="text" id="search-box" name="inputs" placeholder="Player + #tag">
+                        <input type="hidden" name="action" value="POST1">
                     </div>
                 </form>
             </div>
         </div>
-        <div class="background">
+        <div class="background" style="background-image: url('https://imgsvc.trackercdn.com/url/max-width(2880),quality(66)/https%3A%2F%2Ftrackercdn.com%2Fcdn%2Ftracker.gg%2Flol%2Fchampions%2F63%2Fskins%2F2-splash.png/image.jpg');">
             <div class="profile-header">
                 <div class="profile-info">
-                    <img src="https://imgsvc.trackercdn.com/url/size(128),fit(cover)/https%3A%2F%2Ftrackercdn.com%2Fddragon%2Fcdn%2F14.10.1%2Fimg%2Fprofileicon%2F1378.png/image.jpg" alt="profile icon">
+                    <img src="https://imgsvc.trackercdn.com/url/size(128),fit(cover)/https%3A%2F%2Ftrackercdn.com%2Fddragon%2Fcdn%2F14.10.1%2Fimg%2Fprofileicon%2F1378.png/image.jpg" alt="background-champ">
                     <div class="game-name">
                         <div class="row">
                             <div class="name"><span>Viroer</span></div>
@@ -37,7 +46,11 @@
                         </div>
                     </div>
                 </div>
-                <button type="button" id="claim-profile">전적 갱신</button>
+                <form id="refresh-form" action="/profile/" method="post">
+                    <input type="hidden" name="action" value="POST2">
+                    <input type="hidden" name="inputs" value="{{ inputBuffer }}">
+                    <button type="submit" id="claim-profile">Profile Updates</button>
+                </form>
             </div>
         </div>
         <div class="sub-background"> </div>
@@ -45,10 +58,13 @@
     
     <div class="main-container">
         <div class="sub-data">
+            <div class="tier-title">
+                <p>Current Rating</p>
+            </div>
             <div class="tier">
                 <div class="descript">
                     <div class="tier-img">
-                        <img src="/static/images/rank/Rank=EMERALD.png" alt="profile icon">
+                        <img src="/static/images/rank/Rank=EMERALD.png" alt="tier img">
                     </div>
 
                     <div class="ranks">
@@ -62,25 +78,74 @@
                 </div>
 
             </div>
-
+            
+            <div class="mastery-title">
+                <p>Mastery Points</p>
+            </div>
             <div class="mastery">
-                <p>숙련도 구현해야함</p>
+                {% for masterys in profileData.mastery %}
+                <div class="mastery1">
+                    <div class="champ-icon">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/14.10.1/img/champion/Aatrox.png" alt="champ img">
+                    </div>
+                    <div class="mastery-icon">
+                        <img src="/static/images/mastery/Mastery_Level_10_Crest.png" alt="champ img">
+                    </div>
+                    <div class="masterys">
+                        <div class="name"><span>Pyke</span></div>
+                        <div class="row">
+                            <div class="point"><span>104,637</span></div>
+                            <div class="point-text"><span>points</span></div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="winrateTop5-title">
+                <p>Top Champions</p>
+            </div>
+
+            <div class="winrateTop5">
+                {% for data in winrateTop5Data %}
+                <div class="top5">
+                    <div class="winrate-champ-icon">
+                        <img src="https://ddragon.leagueoflegends.com/cdn/14.10.1/img/champion/Aatrox.png" alt="champ img">
+                    </div>
+                    <div class="char-data">
+                        <div class="row1">
+                            <div class="name"><span>Pyke</span></div>
+                        </div>
+                        <div class="row2">
+                            <div class="kda"><span>3.86:1 KDA</span></div>
+                            <div class="point-text"><span>10.3 / 4.4 / 6.6</span></div>
+                        </div>
+                        <div class="row3">
+                            <div class="winrate"><span>71%</span></div>
+                            <div class="matches-cnt"><span>40 matches</span></div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="winrateTop5-end">
+                </div>
             </div>
             
         </div>
 
         <div class="match-history">
-            <div class="win-rate"> 최근 20판 - 20전 10승 5패 (50%) </div>
+            <div class="win-rate"> Last 20 Matches - 10W 5L ( 50% ) </div>
             {% for match in matchHistory %}
+            
             <div class="match {{ 'win' if match.win == 'win' else 'lose' }}">
 
                 <div class="match-info">
                     <div class="match-info-top">
-                        <p class="match-info-game-mode">ARAM</p>
+                        <p class="match-info-game-mode">Ranked Solo</p>
                     </div>
                     <div class="match-info-bottom">
                         <p class="match-info-win-status">win</p>
-                        <p class="match-info-game-length">19 분</p>
+                        <p class="match-info-game-length">19 Min</p>
                     </div>
                     
                 </div>
@@ -104,11 +169,11 @@
                     
                 <div class="match-stats1">
                     <p class="match-info-kda">20 / 5 / 5</p>
-                    <p class="match-info-kda-rating">5.00 평점</p>
+                    <p class="match-info-kda-rating">5.00 KDA</p>
                 </div>
                 <div class="match-stats2">
-                    <p class="multikill">트리플킬</p>
-                    <p class="match-info cs">CS 72</p>
+                    <p class="multiKills {{ 'empty' if match.multiKills == ' ' else 'multiKill' }}"> 트리플킬 </p>
+                    <p class="match-info-cs">CS 72 (5.2)</p>
                 </div>
 
                 <div class="item-icons">
