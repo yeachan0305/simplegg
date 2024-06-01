@@ -1,7 +1,10 @@
-import requests
+import requests, json
 
 from flask import url_for
 from functools import lru_cache
+
+import os
+from dotenv import load_dotenv
 
 #몇번 요청했는지 기록. riot api 1초에 10번 요청 가능함
 api_request_count = 0
@@ -14,7 +17,7 @@ def get_api_request_count():
     return api_request_count
 
 def cnt_reset():
-    global api_request_count 
+    global api_request_count
     api_request_count = 0
 
 @lru_cache(maxsize=10000)
@@ -92,7 +95,7 @@ def get_summoner_game_data( id=None, region='kr'):
         losses (int) : 패배한 횟수
         veteran	(boolean)	?
         inactive (boolean)	?
-        freshBlood (boolean) ?	
+        freshBlood (boolean) ?
         hotStreak (boolean)	 ?
     """
 
@@ -108,13 +111,13 @@ def get_summoner_game_data( id=None, region='kr'):
 
     # target_queueType = "RANKED_SOLO_5x5"
     index = None
-    
+
     #get_summoner_game_data queutype이 여러개라서 수정했음
     for i, participant in enumerate(response.json()):
         if participant["queueType"] == "RANKED_SOLO_5x5":
             index = i
             break
-    
+
     if index == None:
         return response.json()
 
@@ -171,7 +174,7 @@ def get_matches_data( matchId=None, gameName=None, region='asia'):
         return 0
 
     gameMode = response.json()["info"]["gameMode"]
-    queueId = queues_dict[response.json()['info']["queueId"]].replace('5v5 ', "").replace(' games', "").replace(" (Quickplay)", "")
+    queueId = queues_dict[str(response.json()['info']["queueId"])].replace('5v5 ', "").replace(' games', "").replace(" (Quickplay)", "")
 
     #아레나 모드는 아직 아이콘파일이 없어서 제외함
     if gameMode == 'CHERRY':
@@ -203,17 +206,17 @@ def win_rate20( puuid=None, gameName=None):
     matchIds = get_summoner_matchId( puuid, count=20)
     if len(matchIds) == 0:
         return [0,0,0]
-    
+
     win = 0
     lose = 0
-    
+
     for i in range(20):
         matchData, gameMode, originalGameName = get_matches_data(matchIds[i], gameName)
         if matchData == 0:
             continue
         if matchData['win'] == True:
             win += 1
-        else: 
+        else:
             lose += 1
 
     winRate = win/(win+lose)*100
@@ -230,7 +233,7 @@ def spectator( puuid=None, region='kr'):
         puuid (str, optional): Player Universal Unique IDentifier. Defaults == None.
 
     Returns:
-        
+
     """
 
     root_url = f'https://{region}.api.riotgames.com/'
@@ -294,7 +297,7 @@ def get_mastery( puuid=None, count=3,  region='kr'):
 def ddragon_get_spell_dict(version="14.10.1"):
     url = f"https://ddragon.leagueoflegends.com/cdn/{version}/data/en_US/summoner.json"
     html = requests.get(url).json()
-    
+
     spell_dict = {}
 
     # data 내의 모든 key와 id 값을 추출하여 새로운 구조에 저장합니다.
@@ -335,24 +338,32 @@ def get_champ_dict(version="14.10.1"):
 
 @lru_cache(maxsize=10000)
 def get_queues_dict():
-    url = f"https://static.developer.riotgames.com/docs/lol/queues.json"
-    html = requests.get(url).json()
-    
-    queues_dict = {item["queueId"]: item["description"] for item in html}
+    # url = f"https://static.developer.riotgames.com/docs/lol/queues.json"
+    # html = requests.get(url).json()
+
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(current_directory, 'queues_dict.json')
+    with open(file_path, 'r') as file:
+        loaded_game_modes = json.load(file)
+
+    # with open('queues_dict.json', 'r') as file:
+    #     loaded_game_modes = json.load(file)
+
+    # queues_dict = {item["queueId"]: item["description"] for item in html}
 
     # # data 내의 모든 key와 id 값을 추출하여 새로운 구조에 저장합니다.
     # for key, value in html["description"].items():
     #     id_value = int(value["queueId"])  # 'key' 값을 id_value로 저장
     #     queues_dict[id_value] = key  # id_value를 키로, key를 값으로 저장
 
-    return queues_dict
+    return loaded_game_modes
 
 def matchdata_parsing(matchId=None, gameName=None):
 
     matchData, gameMode, _ = get_matches_data(matchId, gameName)
     if matchData == 0:
         return 0
-    
+
     #스펠이랑 룬 ID값으로 이름 찾아오기
     spell_dict = ddragon_get_spell_dict()
     perk_dict , rune_dict , perk_img_dict = ddragon_get_runes_dict()
@@ -373,12 +384,12 @@ def matchdata_parsing(matchId=None, gameName=None):
     else:
         win = "Lose"
 
-    
+
 
     #룬 아이콘 링크가 옛날버전이라 영감이 없음.
     if perk_dict[rune2Main] == "Inspiration":
         rune2 = 'Whimsy'
-    else: 
+    else:
         rune2 = perk_dict[rune2Main]
 
     #아이템이 있는경우 아이템이미지링크, 없으면 빈 네모. (아이템이 없으면 id가 0)
@@ -390,7 +401,7 @@ def matchdata_parsing(matchId=None, gameName=None):
             # itemIcons.append('test')
         else:
             itemIcons.append(f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/item/{matchData[n]}.png")
-    
+
     #멀티킬 데이터 정리
     if matchData["pentaKills"] > 0:
         multiKills = "Penta Kills"
@@ -402,7 +413,7 @@ def matchdata_parsing(matchId=None, gameName=None):
         multiKills = "Double Kills"
     else:
         multiKills = ' '
-    
+
     matches = {
         "gameMode": gameMode,
         "win": win,
@@ -418,8 +429,8 @@ def matchdata_parsing(matchId=None, gameName=None):
         'csPerMin': round((matchData["totalMinionsKilled"] + matchData["totalAllyJungleMinionsKilled"] + matchData['totalEnemyJungleMinionsKilled']) / gameLength, 1),
         "rune1": matchData["perks"]["styles"][0]["selections"][0]["perk"],
         "rune2": matchData["perks"]["styles"][1]["style"],
-        
-        "champIcon": f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/champion/{matchData["championName"]}.png",
+
+        "champIcon": f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/champion/{matchData['championName']}.png",
         "item0Icon": itemIcons[0],
         "item1Icon": itemIcons[1],
         "item2Icon": itemIcons[2],
@@ -427,8 +438,8 @@ def matchdata_parsing(matchId=None, gameName=None):
         "item4Icon": itemIcons[4],
         "item5Icon": itemIcons[5],
         "item6Icon": itemIcons[6],
-        "spell1Icon": f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/spell/{spell_dict[matchData["summoner1Id"]]}.png",
-        "spell2Icon": f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/spell/{spell_dict[matchData["summoner2Id"]]}.png",
+        "spell1Icon": f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/spell/{spell_dict[matchData['summoner1Id']]}.png",
+        "spell2Icon": f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/spell/{spell_dict[matchData['summoner2Id']]}.png",
         "rune1Icon": f"https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/{perk_dict[rune1Main]}/{rune_dict[rune1Sub]}/{rune_dict[rune1Sub]}.png",
         "rune2Icon": f"https://ddragon.leagueoflegends.com/cdn/img/perk-images/Styles/{perk_img_dict[rune2Main]}_{rune2}.png"
     }
@@ -505,7 +516,13 @@ def aggregate_champion_data(extracted_data, champ_dict):
         data['total_kills'] = round(data['total_kills']/matches, 1)
         data['total_deaths'] = round(data['total_deaths']/matches, 1)
         data['total_assists'] = round(data['total_assists']/matches, 1)
-        data['kda'] = round((data['total_kills']+data['total_assists'])/data['total_deaths'], 2)
+
+        #ZeroDivisionError
+        if data['total_deaths'] != 0:
+            data['kda'] = round((data['total_kills'] + data['total_assists']) / data['total_deaths'], 2)
+        else:
+            data['kda'] = round((data['total_kills'] + data['total_assists']) , 2)
+
 
     return top_5
 
@@ -524,74 +541,6 @@ def claim_profile():
     get_mastery.cache_clear()
 
 # Usage
-api_key = 'RGAPI-4fa4675e-9bc8-45c5-ac63-ce9f7321e999'
-# gameName = '앞비전 후 뒤점멸'
-# tag_line = '4065'
-# def matches_functions(puuid):
-
-#     matchHistory = [
-#     ]
-
-#     matchIds = get_summoner_matchId(puuid)
-#     for i in range(len(matchIds)):
-#         matches = matchdata_parsing(matchIds[i], gameName)
-#         if matches == 0:
-#             continue
-#         matchHistory.append(matches)
-
-#     return matchHistory
-
-# puuid = api_get_puuid(gameName, tag_line)
-# account_data = get_summoner_account_data(puuid)
-# id = account_data['id']
-
-# a = get_matches_data('KR_7089315154', gameName)
-# print(puuid)
-
-# mastery = get_mastery(puuid)
-# print(mastery)
-# a = matches_functions(puuid)
-
-
-
-# b = aggregate_champion_data(champdata_analyze(a),champ_dict)
-# print(b)
-
-# print(account_data)
-# matchIds = get_summoner_matchId( puuid, count=20)
-# print(matchIds)
-
-# print(account_data)
-# a, gameMode = get_matches_data('KR_7090509464', gameName)
-# print(a, gameMode)
-
-# perk_dict , rune_dict, perk_img_dict = ddragon_get_runes_dict()
-# print(rune_dict)
-
-# profileData = profile_functions(puuid)
-# print(get_champ_dict())
-
-# 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/KaiSa_0.jpg'
-
-# def matches_functions(gameName, tag_line):
-
-#     matchHistory = [
-#         # {'date': '2024-05-27', 'data': 'data1', 'result': 'Win'},
-#         # {'date': '2024-05-26', 'data': 'data2', 'result': 'Lose'},
-#         # 여기 매치 데이터 추가해야함.
-#     ]
-
-#     matchIds = get_summoner_matchId(api_get_puuid(gameName, tag_line))
-#     for i in range(len(matchIds)):
-#         matches = matchdata_parsing(matchIds[i], gameName)
-#         matchHistory.append(matches)
-
-
-#     return matchHistory
-
-# a = matches_functions(gameName, tag_line)
-# print(a[0])
-
-# a = get_summoner_matchId(puuid)
-# # a = get_matches_data('KR_7088339652', gameName)
-# print(a
+project_folder = os.path.expanduser('~/mysite')  # adjust as appropriate
+load_dotenv(os.path.join(project_folder, '.env'))
+api_key = os.getenv("RIOT_API_KEY")  # 환경 변수에서 API 키를 가져옴

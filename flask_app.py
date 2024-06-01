@@ -1,11 +1,13 @@
-from flask import Flask, request, render_template, flash, redirect
+from flask import Flask, request, render_template, flash, redirect, url_for
 from main_function import *
-
-import traceback
+from dotenv import load_dotenv
+import traceback, os
 
 app = Flask(__name__)
 
-app.secret_key = 'your_secret_key'
+project_folder = os.path.expanduser('~/mysite')  # adjust as appropriate
+load_dotenv(os.path.join(project_folder, '.env'))
+app.secret_key = os.getenv("SECRET_KEY")
 
 def profile_functions(puuid):
     #입력값을 # 기준으로 쪼개기
@@ -42,7 +44,7 @@ def profile_functions(puuid):
         'inGame': spectator(puuid),
         'tierIcon': tierImg,
         'mastery': mastery,
-        'champbackground':f'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/{mastery[0]['championName']}_0.jpg'
+        'champbackground':f"https://ddragon.leagueoflegends.com/cdn/img/champion/splash/{mastery[0]['championName']}_0.jpg"
     }
 
     #unraked는 rank랑 lp가 없음
@@ -81,7 +83,7 @@ def index():
 
     #페이지 불러올때 미리 캐싱해서 속도 개선
     a = get_champ_dict()
-    a = get_queues_dict()
+    # a = get_queues_dict()
     a,b,c = ddragon_get_runes_dict()
     a = ddragon_get_spell_dict()
     return render_template('main.html')
@@ -107,17 +109,14 @@ def profile():
             err_msg = traceback.format_exc()
             print(err_msg)
             return redirect(url_for('index'))
-            
+
 
         matchHistory, winrateTop5Data= matches_functions(puuid)
 
         cnt = get_api_request_count()
         print(cnt)
-            
-        return render_template('profile v5.html', profileData=profileData, matchHistory=matchHistory,winrateTop5Data=winrateTop5Data, inputBuffer = inputBuffer)
+
+        return render_template('profile.html', profileData=profileData, matchHistory=matchHistory,winrateTop5Data=winrateTop5Data, inputBuffer = inputBuffer)
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-#랭킹
-# https://kr.api.riotgames.com/lol/league-exp/v4/entries/RANKED_SOLO_5x5/CHALLENGER/I?page=1&api_key=RGAPI-4fa4675e-9bc8-45c5-ac63-ce9f7321e999
