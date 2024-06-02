@@ -9,3 +9,4 @@ https://github.com/yeachan0305/simplegg/assets/103321805/af792d98-0e20-4906-8fbf
 
 https://github.com/yeachan0305/simplegg/assets/103321805/ab96065e-8ccb-467d-9f91-7856678ccfb8
 
+![1](https://github.com/yeachan0305/simplegg/assets/103321805/cc79ca00-c831-4e73-9967-fdd4d3e759f6)
