@@ -6,7 +6,7 @@ from functools import lru_cache
 import os
 from dotenv import load_dotenv
 
-#몇번 요청했는지 기록. riot api 1초에 10번 요청 가능함
+#몇번 요청했는지 기록. riot api 1초에 20번 요청 가능함
 api_request_count = 0
 
 def increment_api_count():
@@ -42,10 +42,10 @@ def api_get_puuid( gameName=None, tagLine=None, region='asia'):
     if "status" in response.json():
         print('api_get_puuid -' + str(response.json()))
         return 0
+    
+    # puuid = response.json()['puuid']
 
-    puuid = response.json()['puuid']
-
-    return puuid
+    return response.json()
 
 @lru_cache(maxsize=10000)
 def get_summoner_account_data( puuid=None, region='kr'):
@@ -149,7 +149,7 @@ def get_summoner_matchId( puuid=None, start=0, count=20, region='asia'):
     return response.json()
 
 @lru_cache(maxsize=10000)
-def get_matches_data( matchId=None, gameName=None, region='asia'):
+def get_matches_data( matchId=None, puuid=None, region='asia'):
     """matchId 및 gameName에서 해당 매치에서의 사용자 정보를 가져오기.
 
     Args:
@@ -178,21 +178,19 @@ def get_matches_data( matchId=None, gameName=None, region='asia'):
 
     #아레나 모드는 아직 아이콘파일이 없어서 제외함
     if gameMode == 'CHERRY':
-        return 0,0,0
+        return 0, 0
 
-    #소문자로 바꿔 비교해서 대소문자 관계없이 검색가능하게 함
-    #대신 바꿔입력한 값이 프로필에 뜨기때문에, 원래 게임 이름 가져오는코드 추가함
     index = None
     originalGameName = ''
     for i, participant in enumerate(response.json()['info']['participants']):
-        if participant['riotIdGameName'].lower() == gameName.lower():
+        # if participant['riotIdGameName'].lower() == gameName.lower():
+        if participant['puuid'] == puuid:
             index = i
-            originalGameName = participant['riotIdGameName']
             break
 
-    return response.json()['info']['participants'][index], queueId, originalGameName
+    return response.json()['info']['participants'][index], queueId
 
-def win_rate20( puuid=None, gameName=None):
+def win_rate20( puuid=None ):
     """puuid에서 사용자의 최근 20판 승률계산.
 
     Args:
@@ -211,7 +209,7 @@ def win_rate20( puuid=None, gameName=None):
     lose = 0
 
     for i in range(20):
-        matchData, gameMode, originalGameName = get_matches_data(matchIds[i], gameName)
+        matchData, gameMode = get_matches_data(matchIds[i], puuid)
         if matchData == 0:
             continue
         if matchData['win'] == True:
@@ -221,7 +219,7 @@ def win_rate20( puuid=None, gameName=None):
 
     winRate = win/(win+lose)*100
 
-    wins = [winRate, win, lose, originalGameName]
+    wins = [winRate, win, lose]
 
     return wins
 
@@ -336,31 +334,18 @@ def get_champ_dict(version="14.10.1"):
 
     return champId_dict
 
-@lru_cache(maxsize=10000)
 def get_queues_dict():
-    # url = f"https://static.developer.riotgames.com/docs/lol/queues.json"
-    # html = requests.get(url).json()
 
     current_directory = os.path.dirname(os.path.abspath(__file__))
     file_path = os.path.join(current_directory, 'queues_dict.json')
     with open(file_path, 'r') as file:
         loaded_game_modes = json.load(file)
 
-    # with open('queues_dict.json', 'r') as file:
-    #     loaded_game_modes = json.load(file)
-
-    # queues_dict = {item["queueId"]: item["description"] for item in html}
-
-    # # data 내의 모든 key와 id 값을 추출하여 새로운 구조에 저장합니다.
-    # for key, value in html["description"].items():
-    #     id_value = int(value["queueId"])  # 'key' 값을 id_value로 저장
-    #     queues_dict[id_value] = key  # id_value를 키로, key를 값으로 저장
-
     return loaded_game_modes
 
-def matchdata_parsing(matchId=None, gameName=None):
+def matchdata_parsing(matchId=None, puuid=None):
 
-    matchData, gameMode, _ = get_matches_data(matchId, gameName)
+    matchData, gameMode = get_matches_data(matchId, puuid)
     if matchData == 0:
         return 0
 
@@ -507,7 +492,8 @@ def aggregate_champion_data(extracted_data, champ_dict):
         aggregated_data[champion_id]['total_assists'] += assists
         aggregated_data[champion_id]['total_cs'] += cs
 
-    sorted_data = sorted(aggregated_data.values(), key=lambda x: total_games(x), reverse=True)
+    #정렬 기준에 판수 말고 승률도 포함시킴
+    sorted_data = sorted(aggregated_data.values(), key=lambda x: (total_games(x), x['total_wins']), reverse=True)
     top_5 = sorted_data[:5]
 
     for data in top_5:

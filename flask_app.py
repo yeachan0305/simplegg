@@ -11,15 +11,14 @@ app.secret_key = os.getenv("SECRET_KEY")
 
 def profile_functions(puuid):
     #입력값을 # 기준으로 쪼개기
-    inputs = request.form['inputs'].split('#')
 
     #riot api로 데이터 불러오기
-    accountData = get_summoner_account_data(puuid)
+    accountData = get_summoner_account_data(puuid['puuid'])
     summonerGameData = get_summoner_game_data(accountData['id'])
-    winRate = win_rate20(puuid, inputs[0])
+    winRate = win_rate20(puuid['puuid'])
 
     #챔피언 숙련도 불러오기
-    mastery = get_mastery(puuid)
+    mastery = get_mastery(puuid['puuid'])
     champ_dict = get_champ_dict()
 
     if len(summonerGameData) >= 1:
@@ -30,8 +29,8 @@ def profile_functions(puuid):
     tierImg = url_for('static', filename=f'images/rank/Rank={tier}.png')
 
     profileData = {
-        'name': winRate[3],
-        'tagline': inputs[1],
+        'name': puuid['gameName'],
+        'tagline': puuid['tagLine'],
         'level': accountData['summonerLevel'],
         'id': accountData['id'],
         'icon': f"https://ddragon.leagueoflegends.com/cdn/14.10.1/img/profileicon/{accountData['profileIconId']}.png",
@@ -41,7 +40,7 @@ def profile_functions(puuid):
         'winRate': round(winRate[0], 1),
         'win': winRate[1],
         'lose': winRate[2],
-        'inGame': spectator(puuid),
+        'inGame': spectator(puuid['puuid']),
         'tierIcon': tierImg,
         'mastery': mastery,
         'champbackground':f"https://ddragon.leagueoflegends.com/cdn/img/champion/splash/{mastery[0]['championName']}_0.jpg"
@@ -61,7 +60,6 @@ def profile_functions(puuid):
     return profileData
 
 def matches_functions(puuid):
-    inputs = request.form['inputs'].split('#')
     champ_dict = get_champ_dict()
 
     matchHistory = [
@@ -69,7 +67,7 @@ def matches_functions(puuid):
 
     matchIds = get_summoner_matchId(puuid)
     for i in range(len(matchIds)):
-        matches = matchdata_parsing(matchIds[i], inputs[0])
+        matches = matchdata_parsing(matchIds[i], puuid)
         if matches == 0:
             continue
         matchHistory.append(matches)
@@ -111,7 +109,7 @@ def profile():
             return redirect(url_for('index'))
 
 
-        matchHistory, winrateTop5Data= matches_functions(puuid)
+        matchHistory, winrateTop5Data= matches_functions(puuid['puuid'])
 
         cnt = get_api_request_count()
         print(cnt)
