@@ -527,6 +527,7 @@ def claim_profile():
     get_mastery.cache_clear()
 
 # Usage
-project_folder = os.path.expanduser('~/mysite')  # adjust as appropriate
-load_dotenv(os.path.join(project_folder, '.env'))
+# project_folder = os.path.expanduser('~/mysite')  # adjust as appropriate
+# load_dotenv(os.path.join(project_folder, '.env'))
+load_dotenv()
 api_key = os.getenv("RIOT_API_KEY")  # 환경 변수에서 API 키를 가져옴

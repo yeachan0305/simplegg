@@ -5,8 +5,9 @@ import traceback, os
 
 app = Flask(__name__)
 
-project_folder = os.path.expanduser('~/mysite')  # adjust as appropriate
-load_dotenv(os.path.join(project_folder, '.env'))
+# project_folder = os.path.expanduser('~/mysite')  # adjust as appropriate
+# load_dotenv(os.path.join(project_folder, '.env'))
+load_dotenv()
 app.secret_key = os.getenv("SECRET_KEY")
 
 def profile_functions(puuid):
@@ -21,8 +22,12 @@ def profile_functions(puuid):
     mastery = get_mastery(puuid['puuid'])
     champ_dict = get_champ_dict()
 
+    #랭크가 없는데, 배치고사만 본 경우 오류가 떠서 제외시킴.
     if len(summonerGameData) >= 1:
-        tier = summonerGameData['tier']
+        if type(summonerGameData) == list:
+            tier = 'UNRANKED'
+        else:
+            tier = summonerGameData['tier']
     else:
         tier = 'UNRANKED'
 
